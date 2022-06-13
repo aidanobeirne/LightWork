@@ -8,7 +8,7 @@ setup(
    author_email='aidanobeirne@me.com',
    url='https://github.com/aidanobeirne/SimpleScan.git',
    packages=['SimpleScan'],  #same as name
-   install_requires=['PyMeasure', 'PyVISA', 'signal'], #external packages as dependencies
+   install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
    include_package_data=True,
    scripts=[
             'scripts/cool',
