@@ -4,7 +4,7 @@
 import time
 import sys
 import os
-import ParentClasses.Andor.andor as andor
+import SimpleScan.ParentClasses.Andor.andor as andor
 import signal
 
 

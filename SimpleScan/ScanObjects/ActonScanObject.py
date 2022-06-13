@@ -1,6 +1,6 @@
 import sys
 import os
-from ParentClasses.PI_commands import Acton
+from SimpleScan.ParentClasses.PI_commands import Acton
 
 
 class ActonScanObject(Acton):

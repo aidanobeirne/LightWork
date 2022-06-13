@@ -3,3 +3,4 @@ __pychache__/
 /dist/
 /*.egg-info
 desktop.ini
+.DS_Store

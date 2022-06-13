@@ -2,7 +2,7 @@ import sys
 import os
 import numpy as np
 import time
-from ParentClasses import SR830
+from SimpleScan.ParentClasses import SR830
 
 # Time Constant settings are coded as follows:
 # 0 : 10e-6,  1 : 30e-6,   2 : 100e-6,  3 : 300e-6,  4 : 1e-3,  5 : 3e-3,
