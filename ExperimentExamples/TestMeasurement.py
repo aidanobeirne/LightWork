@@ -1,8 +1,8 @@
 import numpy as np
 import os
-from SimpleScan.ScanObjects.TestScanObject import TestScanObject
-from SimpleScan.MeasurementObjects.TestMeasurementObject import TestMeasurementObject
-from SimpleScan.SimpleScan import SimpleScan
+from ScanObjects.TestScanObject import TestScanObject
+from MeasurementObjects.TestMeasurementObject import TestMeasurementObject
+from SimpleScan import SimpleScan
 
 measurer = TestMeasurementObject()
 scanner1 = TestScanObject(name='1', scan_values=np.arange(0,10,1), scan_nest_index=0)

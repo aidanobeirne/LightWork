@@ -1,6 +1,6 @@
-from SimpleScan.MeasurementObjects.JobinYvonMeasurementObject import JobinYvonMeasurementObject
-from SimpleScan.ScanObjects.KeithleyScanObject import KeithleyScanObject
-from Simplescan.SimpleScan import Simplescan
+from MeasurementObjects.JobinYvonMeasurementObject import JobinYvonMeasurementObject
+from ScanObjects.KeithleyScanObject import KeithleyScanObject
+from SimpleScan import Simplescan
 cam = JobinYvonMeasurementObject(exposure_in_s=1, grating=1, use_synapse=1, numavgs=1, center_wl =700, ystart=125, yend=165, slitwidth_mm=1.0)
 topgate = KeithleyScanObject(address ='58', name='TG', compliance_current=300e-9, scan_values=np.arange(-1, 1.25, 0.25), scan_nest_index=0)
 backgate = KeithleyScanObject(address ='59', name='BG', compliance_current=300e-9, scan_values=np.arange(-1, 1.25, 0.25), scan_nest_index=0)

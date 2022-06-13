@@ -2,10 +2,10 @@ import sys
 import os
 
 # Old JY, Synapse, and InGaAs camera fucntions... they're ugly but they work, so i wont try to change them.
-from SimpleScan.ParentClasses.OldJYScripts.spectra import SingleSpectrum
-from SimpleScan.ParentClasses.OldJYScripts.acquire import *
-from SimpleScan.ParentClasses.OldJYScripts.synapse import *
-from SimpleScan.ParentClasses.OldJYScripts.ccd3000_visa import *
+from ParentClasses.OldJYScripts.spectra import SingleSpectrum
+from ParentClasses.OldJYScripts.acquire import *
+from ParentClasses.OldJYScripts.synapse import *
+from ParentClasses.OldJYScripts.ccd3000_visa import *
     
 
 class JobinYvonMeasurementObject():

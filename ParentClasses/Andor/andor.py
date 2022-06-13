@@ -16,6 +16,7 @@ import platform
 from ctypes import *
 from PIL import Image
 import sys
+import os
 
 """Andor class which is meant to provide the Python version of the same
    functions that are defined in the Andor's SDK. Since Python does not
@@ -31,9 +32,9 @@ class Andor:
         
         if platform.system() == "Windows":
             if platform.architecture()[0] == "32bit":
-                self.dll = WinDLL(r"C:\Users\HeinzLab\Desktop\Andor\atmcd32d.dll")
+                self.dll = WinDLL(r"{}".format(os.path.join(os.path.dirname(__file__), "atmcd32d.dll")))
             else:
-                self.dll = WinDLL(r"C:\Users\HeinzLab\Desktop\Andor\atmcd64d.dll")
+                self.dll = WinDLL(r"{}".format(os.path.join(os.path.dirname(__file__), "atmcd64d.dll"))) 
         # for Linux
         elif platform.system() == "Linux":
             dllname = "/usr/local/lib/libandor.so"

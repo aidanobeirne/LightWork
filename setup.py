@@ -9,5 +9,6 @@ setup(
    url='https://github.com/aidanobeirne/SimpleScan.git',
    packages=find_packages(),  #same as name
    include_package_data=True,
+   package_data={'': ['ParentClasses/Andor/*.dll']}
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )
