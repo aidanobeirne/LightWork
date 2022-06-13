@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
    name='SimpleScan',
@@ -7,7 +7,7 @@ setup(
    author='Aidan OBeirne',
    author_email='aidanobeirne@me.com',
    url='https://github.com/aidanobeirne/SimpleScan.git',
-   packages=['SimpleScan'],  #same as name
-   install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
+   packages=find_packages(),  #same as name
    include_package_data=True,
+   install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )
