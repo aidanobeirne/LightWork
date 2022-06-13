@@ -13,8 +13,8 @@ from datetime import date
 
 class SimpleScan:
     def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False,
-			  savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
-			  notify_me=False, ACCOUNT_SID='ACe6abbb0a4982b1abb682fc1a1f416d65', AUTH_TOKEN='7be329a24869ad31054873bd4e274dfa', twilio_to="+12059021472", twilio_from="+16827100017"):
+              savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
+              notify_me=False, ACCOUNT_SID='ACe6abbb0a4982b1abb682fc1a1f416d65', AUTH_TOKEN='7be329a24869ad31054873bd4e274dfa', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
 
         Parameters
@@ -110,12 +110,12 @@ class SimpleScan:
         Runs the sweep as defined by the instance of the SimpleScan.
         """
         self.master_data = {}
-		# open shutter
+        # open shutter
         try:
             self.shutter.flipperOn()
         except AttributeError:
             pass
-		
+        
         start_time = time.time()
         print('Scan started')
         for count, values in enumerate(self.scan_values):
@@ -123,7 +123,7 @@ class SimpleScan:
             # unique_ID = '--'.join(['{}={}'.format(i,j) for i,j in zip(self.scan_instrument_names, values)])
             unique_ID = count
             self.master_data[unique_ID] = {}
-			# time calculation
+            # time calculation
             if count%5 == 0 and count > 0:
                 time_so_far = time.time() - start_time
                 percent_complete = count/len(self.scan_values)
@@ -131,7 +131,7 @@ class SimpleScan:
                 time_remaining = (total_time_estimate-time_so_far)/3600 
                 # print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
                print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))), end='\r', flush=True)
-			# set scan values for every scan instrument
+            # set scan values for every scan instrument
             for inst, value in zip(self.scan_instruments, values):
                 inst.set_scan_value(value)
                 try:
@@ -139,7 +139,7 @@ class SimpleScan:
                 except TypeError:
                     pass
                 
-			# acquire data
+            # acquire data
             data = self.measurement_instrument.measure()
             
             # Save the data at every step if desired
@@ -155,19 +155,19 @@ class SimpleScan:
         self.meta_data['Scan time'] = '{} hours and {} minutes'.format(np.floor(scan_time), np.rint(60*(scan_time%1)))
         self.final_save(self.master_data)
         
-		# close shutter
+        # close shutter
         try:
             self.shutter.flipperOff()
         except AttributeError:
             pass
-		
+        
         if self.notify_me:
             client = Client(self.AUTH_TOKEN, self.ACCOUNT_SID)
             client.messages.create(
                 to=self.twilio_to, 
                 from_=self.twilio_from, 
                 body='Scan took {} hours and {} minutes'.format(int(np.floor(self.scan_time)), int(np.rint(60*(self.scan_time%1))))
-                       )	
+                       )    
 
     def save_data_npz(self, scan_values, data, unique_ID):
         """
@@ -188,7 +188,7 @@ class SimpleScan:
         """
         saveto = self.savefile + str(unique_ID) +'.npz'
         np.savez(saveto, data=data)
-		
+        
     def save_data_pkl(self, scan_values, data, unique_ID):
         """
         Parameters
