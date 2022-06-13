@@ -129,8 +129,8 @@ class SimpleScan:
                 percent_complete = count/len(self.scan_values)
                 total_time_estimate = time_so_far/percent_complete
                 time_remaining = (total_time_estimate-time_so_far)/3600 
-                print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
-#                print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))), end='\r', flush=True)
+                # print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
+               print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))), end='\r', flush=True)
 			# set scan values for every scan instrument
             for inst, value in zip(self.scan_instruments, values):
                 inst.set_scan_value(value)
@@ -257,36 +257,22 @@ class SimpleScan:
 
 if __name__=='__main__':
     
-#    from TestScanObject import TestScanObject
-#    from TestMeasurementObject import TestMeasurementObject
-#    measurer = TestMeasurementObject()
-#    scanner1 = TestScanObject(name='1', scan_values=np.arange(0,10,1), scan_nest_index=0)
-#    scanner2 = TestScanObject(name='2', scan_values=np.arange(10,20,1), scan_nest_index=0)
-#    scanner3 = TestScanObject(name='3', scan_values=np.arange(30,31,0.1), scan_nest_index=1)
-#    scanner4 = TestScanObject(name='4', scan_values=np.arange(0.1,1.2,0.2), scan_nest_index=2)
-#    
-#    Measurement = SimpleScan(
-#        measurement_instrument=measurer, scan_instruments=[scanner1, scanner2, scanner3], laser_shutter=False,
-#        savepath= os.path.join(os.getcwd(),'test'),
-#        savename='test', scan_notes='', save_npz=0, save_at_every_step=False
-#        )
-#    print(Measurement.scan_values)
-#    Measurement.run_sweep()
-    
-    from SimpleScan.JobinYvonMeasurementObject import JobinYvonMeasurementObject
-    from SimpleScan.KeithleyScanObject import KeithleyScanObject
-    cam = JobinYvonMeasurementObject(exposure_in_s=1, grating=1, use_synapse=1, numavgs=1, center_wl =700, ystart=125, yend=165, slitwidth_mm=1.0)
-    topgate = KeithleyScanObject(address ='58', name='TG', compliance_current=300e-9, scan_values=np.arange(-1, 1.25, 0.25), scan_nest_index=0)
-    backgate = KeithleyScanObject(address ='59', name='BG', compliance_current=300e-9, scan_values=np.arange(-1, 1.25, 0.25), scan_nest_index=0)
+   from TestScanObject import TestScanObject
+   from TestMeasurementObject import TestMeasurementObject
+   measurer = TestMeasurementObject()
+   scanner1 = TestScanObject(name='1', scan_values=np.arange(0,10,1), scan_nest_index=0)
+   scanner2 = TestScanObject(name='2', scan_values=np.arange(10,20,1), scan_nest_index=0)
+   scanner3 = TestScanObject(name='3', scan_values=np.arange(30,31,0.1), scan_nest_index=1)
+   scanner4 = TestScanObject(name='4', scan_values=np.arange(0.1,1.2,0.2), scan_nest_index=2)
+   
+   Measurement = SimpleScan(
+       measurement_instrument=measurer, scan_instruments=[scanner1, scanner2, scanner3], laser_shutter=False,
+       savepath= os.path.join(os.getcwd(),'test'),
+       savename='test', scan_notes='', save_npz=0, save_at_every_step=False
+       )
+   print(Measurement.scan_values)
+   Measurement.run_sweep()
 
-    
-    Measurement = SimpleScan(
-         measurement_instrument=cam, scan_instruments=[topgate, backgate], laser_shutter=False,
-         savepath=r"C:\Users\heinz\Documents\User Files\aidan\simpleSweeptest\{}/".format(date.today().strftime("%b-%d-%Y")),
-         savename='test',scan_notes='', save_npz=0, notify_me=False
-         )
-
-    Measurement.run_sweep()
     
 
 

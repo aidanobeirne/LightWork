@@ -11,12 +11,10 @@ class SR830MeasurementObject(SR830):
         super().__init__(port=port, read_termination='\r')
         self.scan_instrument_name = 'SR830'
         self.meta_data = {}
-        self.update_meta_data(TCs_to_wait=TCs_to_wait, navg = navg)
-                    
+        self.update_meta_data(TCs_to_wait=TCs_to_wait, navg = navg)      
             
     def measure(self):
         time.sleep(self.meta_data['TC'] * self.meta_data['TCs to wait'])
-        data = []
         x_values_to_be_averaged = []
         y_values_to_be_averaged = []
         for i in range(self.meta_data['navg']):
@@ -24,10 +22,11 @@ class SR830MeasurementObject(SR830):
             x_values_to_be_averaged.append(self.getX())
             time.sleep(0.005)
             y_values_to_be_averaged.append(self.getY())
-        data.append(np.mean(x_values_to_be_averaged))
-        data.append(np.mean(y_values_to_be_averaged))
-        # data.append(self.getX())
-        # data.append(self.gety())
+        X = np.mean(x_values_to_be_averaged)
+        Y = np.mean(y_values_to_be_averaged)
+        R = np.sqrt(X**2+Y**2)
+        Theta = np.arctan(np.true_divide(Y,X))
+        data = {'X': X, 'Y': Y, 'R': R, 'Theta': Theta}
         return data
     
     def update_meta_data(self, TCs_to_wait=None, navg=None):
