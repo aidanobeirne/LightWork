@@ -10,8 +10,4 @@ setup(
    packages=['SimpleScan'],  #same as name
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
    include_package_data=True,
-   scripts=[
-            'scripts/cool',
-            'scripts/skype',
-           ]
 )
