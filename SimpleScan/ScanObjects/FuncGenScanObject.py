@@ -2,7 +2,7 @@ import time
 import numpy as np
 import sys
 import os
-from ParentClasses import textronix_func_gen
+from SimpleScan.ParentClasses import textronix_func_gen
 
 
 class FuncGenScanObject(FuncGen):

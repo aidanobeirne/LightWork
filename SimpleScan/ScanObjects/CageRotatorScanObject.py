@@ -1,6 +1,6 @@
 import sys
 import os
-from ParentClasses.ThorlabsStages.ThorlabsStages import ThorlabsCageRotator
+from SimpleScan.ParentClasses.ThorlabsStages.ThorlabsStages import ThorlabsCageRotator
 
 
 class CageRotatorScanObject(ThorlabsCageRotator):

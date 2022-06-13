@@ -1,6 +1,6 @@
 import sys
 import os
-from ParentClasses.Solstis.solstis import SolstisError, Solstis
+from SimpleScan.ParentClasses.Solstis.solstis import SolstisError, Solstis
 import socket 
 
 
