@@ -2,3 +2,4 @@ __pychache__/
 *.pyc
 /dist/
 /*.egg-info
+desktop.ini
