@@ -20,7 +20,7 @@ class Solstis():
     def __init__(self, address='192.168.1.222', port=39900):
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
           self.sock.connect((address, port))
-          self.sock.settimeout(10)
+          self.sock.settimeout(30)
           self.start_link()
           
           
