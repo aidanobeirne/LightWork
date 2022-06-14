@@ -130,7 +130,7 @@ class Solstis():
         raise SolstisError("Link could not be formed")
       else:
         raise SolstisError("Unknown error: Could not determine link status")
-        
+
     def move_wave_t(self, wavelength, transmission_id=1):
       """Sets the wavelength based on wavelength table. Returns an error if the wavemeter TCP connections
       is established
@@ -269,6 +269,79 @@ class Solstis():
         return
       else:
         raise SolstisError("etalon_lock Failed; Reason Unknown")
+    def get_status(self, transmission_id=1):
+    """Retrieves the system status information available to the user
+    Parameters:
+      sock ~ Socket object to use
+      transmission_id ~ (int) arbitrary integer to use for communications
+    Returns:
+      A dictionary containing the following key/value pairs:
+        "status" ~ 0 on a succesful call, and 1 otherwise 
+        "wavelength" ~ The current wavelength in nm
+        "temperature" ~ Current temperature in degrees Celcius
+        "temperature_status" ~ "on" or "off"
+        "etalon_lock" ~ "on","off","debug","error","search" or "low". See Manual.
+        "etalon_voltage" ~ Reading in Volts
+        "cavity_lock" ~ "on","off","debug","error","search" or "low"
+        "resonator_voltage" ~ Reading in Volts
+        "ecd_lock" ~ "not_fitted","on","off","debug","error","search" or "low"
+        "ecd_voltage" ~ Reading in Volts
+        "output_monitor" ~ Reading in Volts
+        "etalon_pd_dc" ~ Reading in Volts
+        "dither" ~ "on" or "off"
+    Raises:
+      SolstisError on operation failure
+    """
+
+    self.send_msg(transmission_id,"get_status")
+    val = self.recv_msg()
+    self.verify_msg(val,op="get_status_reply",transmission_id=transmission_id)
+    status = val["message"]["parameters"]["status"][0]
+    if status == 1:
+      raise SolstisError("get_status failed: reason unknown")
+    params = val["message"]["parameters"]
+    return_val = {"status": 0}
+    return_val["wavelength"] = params["wavelength"][0]
+    return_val["temperature"] = params["temperature"][0]
+    return_val["temperature_status"] = params["temperature_status"]
+    return_val["etalon_lock"] = params["etalon_lock"]
+    return_val["etalon_voltage"] = params["etalon_voltage"][0]
+    return_val["cavity_lock"] = params["cavity_lock"]
+    return_val["resonator_voltage"] = params["resonator_voltage"][0]
+    return_val["ecd_lock"] = params["ecd_lock"]
+    if params["ecd_voltage"] == "not_fitted":
+      return_val["ecd_voltage"] = -float('inf')
+    else:
+      return_val["ecd_voltage"] = params["ecd_voltage"][0]
+    return_val["output_monitor"] = params["output_monitor"][0]
+    return_val["etalon_pd_dc"] = params["etalon_pd_dc"][0]
+    return_val["dither"] = params["dither"]
+
+    return return_val
+
+    def set_wave_tolerance_m(self,tolerance=1.0,transmission_id=1):
+    """Sets the tolerance for the sending of the set_wave_m final report
+    Parameters:
+      sock ~ Socket object to use for communications
+      tolerance ~ (float) New tolerance value
+      transmission_id ~ (int) Arbitrary integer for use in communications
+    Returns:
+      Nothing on successful execution
+    Raises:
+      SolstisError on failed execution
+    """
+    self.send_msg(transmission_id,"set_wave_tolerance_m",{"tolerance": tolerance})
+    val = self.recv_msg(sock)
+    self.verify_msg(val,
+               transmission_id=transmission_id,
+               op="set_wave_tolerance_m_reply")
+    status = val["message"]["parameters"]["status"][0]
+    if status == 0:
+      return
+    elif status == 1:
+      raise SolstisError("Could not set tolerance; No wavemeter connected")
+    else:
+      raise SolstisError("Could not set tolerance; Tolerance Value Out of Range")
     
     
     def close(self):
