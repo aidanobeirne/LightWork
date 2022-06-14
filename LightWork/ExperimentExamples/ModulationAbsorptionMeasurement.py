@@ -33,7 +33,7 @@ Reference.run_sweep()
 
 # Change LockIn parameters and run sample scan
 LockIn.setTC(13)
-Lockin.setsens(8)
+LockIn.setsens(8)
 LockIn.update_meta_data()
 Sample = SimpleScan(
    measurement_instrument=LockIn, scan_instruments=[solstis], laser_shutter=False,
