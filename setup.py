@@ -12,5 +12,6 @@ setup(
    # package_data={'Andor dll': ['ParentClasses/Andor/*.dll'], 'Thorlabs dll': ['ParentClasses/Andor/ThorlabsStages/*.dll'], 'Thorlabs lib': ['ParentClasses/Andor/ThorlabsStages/*.lib'],
    # 'Thorlabs h': ['ParentClasses/Andor/ThorlabsStages/*.h'], 'Thorlabs xml': ['ParentClasses/Andor/ThorlabsStages/*.xml']},
    # package_data={'dlls': ['ParentClasses/Andor/*.dll'], 'examples' : ['ExperimentExamples/*.py']},
+   zip_safe=False,
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )
