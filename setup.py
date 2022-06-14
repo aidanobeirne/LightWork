@@ -10,6 +10,6 @@ setup(
    packages=find_packages(),  #same as name
    include_package_data=True,
    package_data={'LightWork/ParentClasses/ThorlabsStages': ['*.dll', '*.h', '*.lib', '*.xml'], 'LightWork/ParentClasses/Andor': ['*.dll']},
-   zip_safe=False,
+   # zip_safe=False,
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )
