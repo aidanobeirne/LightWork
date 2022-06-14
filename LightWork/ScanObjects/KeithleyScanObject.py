@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import os
 from pymeasure.adapters import VISAAdapter
-from LightWork.ParentClasses import Keithley2400
+from LightWork.ParentClasses.keithley2400 import Keithley2400
 
 
 class KeithleyScanObject(Keithley2400):

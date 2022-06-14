@@ -2,14 +2,6 @@ import time
 import numpy as np
 import sys
 import os
-# def build_path(n): # Set n to the number of directories to move upward until Python folder is found
-#     p = __file__
-#     for i in range(n):
-#         p = os.path.dirname(p)
-#     return p
-# sys.path.append(build_path(3))
-
-
 
 class TestScanObject():
     def __init__(self, scan_values, name='1', scan_nest_index=0):
