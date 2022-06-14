@@ -105,9 +105,9 @@ class SimpleScan:
 
         self.scan_instruments = [self.scan_instruments[i] for i in new_instrument_order]
     
-    def run_sweep(self):
+    def run_scan(self):
         """
-        Runs the sweep as defined by the instance of the SimpleScan.
+        Runs the scan as defined by the instance of the SimpleScan.
         """
         self.master_data = {}
         # open shutter

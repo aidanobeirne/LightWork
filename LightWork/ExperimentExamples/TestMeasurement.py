@@ -16,7 +16,7 @@ Measurement = SimpleScan(
    savename='test', scan_notes='', save_npz=0, save_at_every_step=False
    )
 print(Measurement.scan_values)
-Measurement.run_sweep()
+Measurement.run_scan()
     
     
 

@@ -14,7 +14,7 @@ Measurement = SimpleScan(
      savename='test',scan_notes='', save_npz=0, notify_me=False
      )
 
-Measurement.run_sweep()
+Measurement.run_scan()
     
     
 

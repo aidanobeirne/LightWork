@@ -42,7 +42,7 @@ Sample = SimpleScan(
    )
 
 input('Turn off and remove chopper. Set the AC bias. Press Enter')
-Sample.run_sweep()
+Sample.run_scan()
 
 
 
