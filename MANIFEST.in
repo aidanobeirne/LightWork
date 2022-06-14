@@ -1,0 +1,3 @@
+global-exclude *.py[co]
+graft LightWork\ParentClasses\Andor
+graft LightWork\ParentClasses\ThorlabsStages
