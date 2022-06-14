@@ -9,8 +9,8 @@ setup(
    url='https://github.com/aidanobeirne/LightWork.git',
    packages=find_packages(),  #same as name
    include_package_data=True,
-   package_data={'Andor dll': ['ParentClasses/Andor/*.dll'], 'Thorlabs dll': ['ParentClasses/Andor/ThorlabsStages/*.dll'], 'Thorlabs lib': ['ParentClasses/Andor/ThorlabsStages/*.lib'],
-   'Thorlabs h': ['ParentClasses/Andor/ThorlabsStages/*.h'], 'Thorlabs xml': ['ParentClasses/Andor/ThorlabsStages/*.xml']},
+   # package_data={'Andor dll': ['ParentClasses/Andor/*.dll'], 'Thorlabs dll': ['ParentClasses/Andor/ThorlabsStages/*.dll'], 'Thorlabs lib': ['ParentClasses/Andor/ThorlabsStages/*.lib'],
+   # 'Thorlabs h': ['ParentClasses/Andor/ThorlabsStages/*.h'], 'Thorlabs xml': ['ParentClasses/Andor/ThorlabsStages/*.xml']},
    # package_data={'dlls': ['ParentClasses/Andor/*.dll'], 'examples' : ['ExperimentExamples/*.py']},
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )

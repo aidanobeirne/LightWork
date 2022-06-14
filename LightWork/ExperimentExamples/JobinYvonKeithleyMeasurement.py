@@ -1,3 +1,5 @@
+import numpy as save_npz
+
 from LightWork.MeasurementObjects.JobinYvonMeasurementObject import JobinYvonMeasurementObject
 from LightWork.ScanObjects.KeithleyScanObject import KeithleyScanObject
 from LightWork.SimpleScan import SimpleScan
