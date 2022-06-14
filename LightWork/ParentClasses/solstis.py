@@ -130,6 +130,27 @@ class Solstis():
         raise SolstisError("Link could not be formed")
       else:
         raise SolstisError("Unknown error: Could not determine link status")
+        
+    def move_wave_t(self, wavelength, transmission_id=1):
+      """Sets the wavelength based on wavelength table. Returns an error if the wavemeter TCP connections
+      is established
+      Parameters:
+        sock ~ socket object to use
+        wavelength ~ (float) wavelength set point
+        transmission_id ~ (int) Arbitrary integer for communications
+      Returns:
+        Nothing
+      """
+      self.send_msg(transmission_id,"move_wave_t", {"wavelength": [wavelength]})
+      val = self.recv_msg()
+      self.verify_msg(val,transmission_id=transmission_id,op="move_wave_t_reply")
+      status = val["message"]["parameters"]["status"][0]
+      if status == 0:
+        return
+      elif status == 1:
+        raise SolstisError("move_wave_t: Failed, is your wavemeter configured?")
+      else:
+        raise SolstisError("Wavelength out of range.")
 
     def set_wave_m(self, wavelength, transmission_id = 1, timeout=20.0):
       """Sets wavelength given that a wavelength meter is configured
