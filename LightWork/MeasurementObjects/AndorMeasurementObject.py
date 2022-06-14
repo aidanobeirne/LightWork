@@ -51,7 +51,7 @@ class AndorMeasurementObject():
         spec = []
         self.cam.GetAcquiredData(spec)
         data = {'wavelengths':self.wavelengths, 'spec':spec}
-        return spec
+        return data
 
     def signal_handler(self, signal, frame):
         print('Shutting down the camera...')
