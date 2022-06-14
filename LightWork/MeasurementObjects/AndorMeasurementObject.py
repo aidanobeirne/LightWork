@@ -50,7 +50,7 @@ class AndorMeasurementObject():
         self.cam.StartAcquisition()
         spec = []
         self.cam.GetAcquiredData(spec)
-        data = {'wavelengths':wavelengths, 'spec':spec}
+        data = {'wavelengths':self.wavelengths, 'spec':spec}
         return spec
 
     def signal_handler(self, signal, frame):
