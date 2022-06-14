@@ -7,7 +7,7 @@ setup(
    author='Aidan OBeirne',
    author_email='aidanobeirne@me.com',
    url='https://github.com/aidanobeirne/LightWork.git',
-   packages=find_packages(),  #same as name
+   packages=find_packages(),  
    include_package_data=True,
    install_requires=['PyMeasure', 'PyVISA'], #external packages as dependencies
 )
