@@ -30,7 +30,7 @@ from pymeasure.instruments import Instrument, RangeException
 from pymeasure.adapters import PrologixAdapter
 from pymeasure.instruments.validators import truncated_range, strict_discrete_set
 
-from .buffer import KeithleyBuffer
+from pymeasure.instruments.keithley.buffer import KeithleyBuffer
 
 import numpy as np
 import time
