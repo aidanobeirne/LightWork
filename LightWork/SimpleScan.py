@@ -14,7 +14,7 @@ from datetime import date
 class SimpleScan:
     def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False,
               savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
-              notify_me=False, ACCOUNT_SID='ACe6abbb0a4982b1abb682fc1a1f416d65', AUTH_TOKEN='7be329a24869ad31054873bd4e274dfa', twilio_to="+12059021472", twilio_from="+16827100017"):
+              notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
 
         Parameters
@@ -38,9 +38,9 @@ class SimpleScan:
         notify_me : BOOL, optional
             TRUE TO SEND A TEXT MESSAGE WHEN THE SCAN IS COMPLETE. The default is False.
         ACCOUNT_SID : STR, optional
-            TWILIO ACCOUNT SID. The default is 'ACe6abbb0a4982b1abb682fc1a1f416d65'.
+            TWILIO ACCOUNT SID. The default is ''.
         AUTH_TOKEN : STR, optional
-            TWILIO ACCOUNT TOKEN. The default is '7be329a24869ad31054873bd4e274dfa'.
+            TWILIO ACCOUNT TOKEN. The default is ''.
         twilio_to : STR, optional
             PHONE NUMBER TO SEND MESSAGE TO. The default is "+12059021472".
         twilio_from : STR, optional
