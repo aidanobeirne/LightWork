@@ -1,6 +1,6 @@
 import sys
 import os
-from LightWork.ParentClasses.Solstis.solstis import SolstisError, Solstis
+from LightWork.ParentClasses.solstis import SolstisError, Solstis
 import socket 
 
 
