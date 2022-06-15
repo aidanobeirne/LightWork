@@ -7,9 +7,9 @@ from LightWork.ParentClasses.keithley2400 import Keithley2400
 
 
 class KeithleyScanObject(Keithley2400):
-    def __init__(self, scan_values, address ='16', name='TG', compliance_current=300e-9, scan_nest_index=0):
+    def __init__(self, scan_values, address='16', name='TG', compliance_current=300e-9, scan_nest_index=0):
         """
-        
+
         Parameters
         ----------
         scan_values : LIST OR ARRAY
@@ -37,10 +37,10 @@ class KeithleyScanObject(Keithley2400):
         self.compliance_current = compliance_current
         self.source_enabled = 1
         self.enable_source()
-        
+
     def set_scan_value(self, value):
-        self.ramp_to_voltage_step_size(value, step_size = 0.01, pause = 0.01)
-	
+        self.ramp_to_voltage_step_size(value, step_size=0.01, pause=0.01)
+
     def get_save_data(self, value=None):
         currents = []
         for i in range(30):
@@ -48,11 +48,11 @@ class KeithleyScanObject(Keithley2400):
             # currents.append(self.mean_current)
             currents.append(self.current[1])
             time.sleep(0.01)
-        data = {'voltage [V]' : value, 'leakage current [nA]' : 1e-9*np.mean(currents)}
-        print('{}, {} V, {} nA leakage current'.format(self.scan_instrument_name, value, np.round(1e-9*np.mean(currents), 4)))
+        data = {'voltage [V]': value,
+                'leakage current [nA]': 1e9*np.mean(currents)}
+        print('{}, {} V, {} nA leakage current'.format(
+            self.scan_instrument_name, value, np.round(1e9*np.mean(currents), 4)))
         return data
-	
+
     def close(self):
-        self.ramp_to_voltage_step_size(0, step_size = 0.01, pause = 0.01)
-		
-		
+        self.ramp_to_voltage_step_size(0, step_size=0.01, pause=0.01)
