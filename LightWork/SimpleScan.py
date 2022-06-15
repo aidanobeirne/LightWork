@@ -7,14 +7,13 @@ import time
 import copy
 import pdb
 from datetime import date
-
-
+from twilio.rest import Client
 
 
 class SimpleScan:
     def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False,
-              savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
-              notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
+                 savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
+                 notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
 
         Parameters
@@ -56,7 +55,8 @@ class SimpleScan:
         self.meta_data = {'scan notes': scan_notes}
         self.save_npz = save_npz
         self.scan_instruments = scan_instruments
-        self.scan_instrument_names = [inst.scan_instrument_name for inst in self.scan_instruments]
+        self.scan_instrument_names = [
+            inst.scan_instrument_name for inst in self.scan_instruments]
         self.savefile = os.path.join(savepath, savename)
         self.notify_me = notify_me
         self.twilio_to = twilio_to
@@ -66,33 +66,37 @@ class SimpleScan:
         if not os.path.exists(savepath):
             os.makedirs(savepath)
         if laser_shutter:
-            from ThorlabsStages.ThorlabsStages import LaserShutter
+            from LightWork.ParentClasses.ThorlabsStages.ThorlabsStages import LaserShutter
             self.shutter = LaserShutter()
-        if notify_me:
-            from twilio.rest import Client
-            
+
         self.generate_scan_list()
-        
-    
+
     def generate_scan_list(self):
         """
         This function generates a scan_list attribute which is a list of lists containing the scan values at every scan iteration.
         """
-        scan_nest_indices = [inst.scan_nest_index for inst in self.scan_instruments]
-        self.scan_values = [] # list of sublists where each sublist will eventually be a complete set of scan instrument step values
-         
+        scan_nest_indices = [
+            inst.scan_nest_index for inst in self.scan_instruments]
+        # list of sublists where each sublist will eventually be a complete set of scan instrument step values
+        self.scan_values = []
+
         new_instrument_order = []
         for idx in set(np.array(scan_nest_indices) - np.min(scan_nest_indices)):
-            instruments_with_same_idx = [inst for inst in self.scan_instruments if inst.scan_nest_index==idx]      
+            instruments_with_same_idx = [
+                inst for inst in self.scan_instruments if inst.scan_nest_index == idx]
             for i in instruments_with_same_idx:
-                new_instrument_order.append(self.scan_instruments.index(i))                                         
-            scan_arrays_to_be_zipped = [instrument.scan_values for instrument in instruments_with_same_idx]  
+                new_instrument_order.append(self.scan_instruments.index(i))
+            scan_arrays_to_be_zipped = [
+                instrument.scan_values for instrument in instruments_with_same_idx]
             if not all(len(l) == len(scan_arrays_to_be_zipped[0]) for l in scan_arrays_to_be_zipped):
-#                self.close()
-                raise ValueError('not all lists in scan nest index = {} have same length, you silly goose!'.format(idx + min(scan_nest_indices)))
-            merged_list_to_add = list(map(list, zip(*scan_arrays_to_be_zipped))) #list(zip(*scan_arrays_to_be_zipped))
-            if idx==0:                       
-                self.scan_values.extend(merged_list_to_add)                                                                
+                #                self.close()
+                raise ValueError('not all lists in scan nest index = {} have same length, you silly goose!'.format(
+                    idx + min(scan_nest_indices)))
+            # list(zip(*scan_arrays_to_be_zipped))
+            merged_list_to_add = list(
+                map(list, zip(*scan_arrays_to_be_zipped)))
+            if idx == 0:
+                self.scan_values.extend(merged_list_to_add)
             else:
                 temp_scan_list = []
 #                pdb.set_trace()
@@ -103,8 +107,9 @@ class SimpleScan:
                     temp_scan_list.append(new_sublist)
                 self.scan_values = temp_scan_list
 
-        self.scan_instruments = [self.scan_instruments[i] for i in new_instrument_order]
-    
+        self.scan_instruments = [self.scan_instruments[i]
+                                 for i in new_instrument_order]
+
     def run_scan(self):
         """
         Runs the scan as defined by the instance of the SimpleScan.
@@ -115,7 +120,7 @@ class SimpleScan:
             self.shutter.flipperOn()
         except AttributeError:
             pass
-        
+
         start_time = time.time()
         print('Scan started')
         for count, values in enumerate(self.scan_values):
@@ -124,50 +129,56 @@ class SimpleScan:
             unique_ID = count
             self.master_data[unique_ID] = {}
             # time calculation
-            if count%5 == 0 and count > 0:
+            if count % 5 == 0 and count > 0:
                 time_so_far = time.time() - start_time
                 percent_complete = count/len(self.scan_values)
                 total_time_estimate = time_so_far/percent_complete
-                time_remaining = (total_time_estimate-time_so_far)/3600 
+                time_remaining = (total_time_estimate-time_so_far)/3600
                 # print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
-                print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))), end='\r', flush=True)
+                print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(
+                    time_remaining)), int(np.rint(60*(time_remaining % 1)))), end='\r', flush=True)
             # set scan values for every scan instrument
             for inst, value in zip(self.scan_instruments, values):
                 inst.set_scan_value(value)
                 try:
-                    self.master_data[unique_ID]['{}'.format(inst.scan_instrument_name)] = inst.get_save_data(value)
+                    self.master_data[unique_ID]['{}'.format(
+                        inst.scan_instrument_name)] = inst.get_save_data(value)
                 except TypeError:
                     pass
-                
+
             # acquire data
             data = self.measurement_instrument.measure()
-            
+
             # Save the data at every step if desired
             if self.save_at_every_step:
-                self.save_data_npz(values, data, unique_ID) if self.save_npz else self.save_data_pkl(values, data, unique_ID)
-                
+                self.save_data_npz(values, data, unique_ID) if self.save_npz else self.save_data_pkl(
+                    values, data, unique_ID)
+
             # Add to the master_data dictionary
-            self.master_data[unique_ID]['data'] = data 
-    
-        scan_time = np.round((time.time()-start_time)/3600,2)
+            self.master_data[unique_ID]['data'] = data
+
+        scan_time = np.round((time.time()-start_time)/3600, 2)
         print()
-        print('Scan took {} hours and {} minutes'.format(np.floor(scan_time), np.rint(60*(scan_time%1))))
-        self.meta_data['Scan time'] = '{} hours and {} minutes'.format(np.floor(scan_time), np.rint(60*(scan_time%1)))
+        print('Scan took {} hours and {} minutes'.format(
+            np.floor(scan_time), np.rint(60*(scan_time % 1))))
+        self.meta_data['Scan time'] = '{} hours and {} minutes'.format(
+            np.floor(scan_time), np.rint(60*(scan_time % 1)))
         self.final_save(self.master_data)
-        
+
         # close shutter
         try:
             self.shutter.flipperOff()
         except AttributeError:
             pass
-        
+
         if self.notify_me:
             client = Client(self.AUTH_TOKEN, self.ACCOUNT_SID)
             client.messages.create(
-                to=self.twilio_to, 
-                from_=self.twilio_from, 
-                body='Scan took {} hours and {} minutes'.format(int(np.floor(self.scan_time)), int(np.rint(60*(self.scan_time%1))))
-                       )    
+                to=self.twilio_to,
+                from_=self.twilio_from,
+                body='Scan took {} hours and {} minutes'.format(
+                    int(np.floor(self.scan_time)), int(np.rint(60*(self.scan_time % 1))))
+            )
 
     def save_data_npz(self, scan_values, data, unique_ID):
         """
@@ -186,9 +197,9 @@ class SimpleScan:
         None.
 
         """
-        saveto = self.savefile + str(unique_ID) +'.npz'
+        saveto = self.savefile + str(unique_ID) + '.npz'
         np.savez(saveto, data=data)
-        
+
     def save_data_pkl(self, scan_values, data, unique_ID):
         """
         Parameters
@@ -209,19 +220,21 @@ class SimpleScan:
         save_data['data'] = data
         meta_data = copy.deepcopy(self.meta_data)
         for instrument, value in zip(self.scan_instruments, scan_values):
-#            try:
-#                save_data['{}'.format(instrument.scan_instrument_name)] = instrument.get_save_data(value)
-#            except TypeError:
-#                pass
+            #            try:
+            #                save_data['{}'.format(instrument.scan_instrument_name)] = instrument.get_save_data(value)
+            #            except TypeError:
+            #                pass
             try:
-                meta_data['{}'.format(instrument.scan_instrument_name)] = instrument.meta_data
+                meta_data['{}'.format(
+                    instrument.scan_instrument_name)] = instrument.meta_data
             except TypeError:
                 pass
-        meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)] = self.measurement_instrument.meta_data
+        meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)
+                  ] = self.measurement_instrument.meta_data
         save_data['meta_data'] = meta_data
         saveto = '{}_{}.pkl'.format(self.savefile, unique_ID)
-        pickle.dump(save_data, open(saveto,"wb"))
-        
+        pickle.dump(save_data, open(saveto, "wb"))
+
     def final_save(self, data):
         """
         Used to save the dictionary that contains all of the data at the end of the run_sweep() method
@@ -229,7 +242,7 @@ class SimpleScan:
         Parameters
         ----------
         data : DICTIONARY
-            The master_data dictionary that is constructed in the run_sweep() method.
+            The master_data dictionary that is constructed in the run_scan() method.
 
         Returns
         -------
@@ -241,41 +254,18 @@ class SimpleScan:
         meta_data = copy.deepcopy(self.meta_data)
         for instrument in self.scan_instruments:
             try:
-                meta_data['{}'.format(instrument.scan_instrument_name)] = instrument.meta_data
+                meta_data['{}'.format(
+                    instrument.scan_instrument_name)] = instrument.meta_data
             except TypeError:
                 pass
-        meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)] = self.measurement_instrument.meta_data
+        meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)
+                  ] = self.measurement_instrument.meta_data
         save_data['meta_data'] = meta_data
         saveto = self.savefile + '.pkl'
-        pickle.dump(save_data, open(saveto,"wb"))
-        
+        pickle.dump(save_data, open(saveto, "wb"))
+
     def close(self):
         for instrument in self.scan_instruments:
             instrument.close()
-            
+
         self.measurement_instrument.close()
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
