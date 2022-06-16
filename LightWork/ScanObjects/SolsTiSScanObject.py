@@ -27,6 +27,7 @@ class SolsTiSScanObject(Solstis):
                     self.wavemeter_wl = self.poll_wave_m()
                 except SolstisError:
                     self.wavemeter_wl = value
+            print(self.wavemeter_wl)
         else:
             self.move_wave_t(value)
             self.wavemeter_wl = 0
