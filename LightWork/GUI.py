@@ -1,46 +1,52 @@
 import glob
+import numpy as np
 import os
 import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QLineEdit, QTabWidget, QGridLayout, QLabel, QWidget, QComboBox, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui
+# from PyQt5 import QtGui
 import inspect
 # Switch to using white background and black foreground
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
 
-class InspectionWindow(QtGui.QMainWindow):
+class InspectionWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.tabWidget = QTabWidget()
         self.setCentralWidget(self.tabWidget)
         self.setWindowTitle('Light Work')
 
-        # Create the 3 main tabs
+        ########################################################## experiment objects tab ################################################
         self.experiment_objects_tab = QWidget()
-        self.experiment_objects_tab.layout = QGridLayout()
-        self.tabWidget.addTab(self.experiment_objects_tab,
-                              "Experiment Objects")
+        self.tabWidget.addTab(self.experiment_objects_tab, "Experiment Objects")
+        vertical_layout = QVBoxLayout()
+        self.experiment_objects = {}
+        self.experiment_objects_combobox = QComboBox()
+        self.experiment_objects_combobox.addItems(self.generate_all_possible_experiment_objects(fullname=True))
+        horizontal_layout = QHBoxLayout()
+        horizontal_layout.addWidget(self.experiment_objects_combobox)
+        add_object_button = QPushButton('Add Experiment Object')
+        add_object_button.clicked.connect(self.add_experiment_object)
+        horizontal_layout.addWidget(add_object_button)
+        vertical_layout.addWidget(horizontal_layout)
+        self.experiment_objects_tree = QTreeWidget()
+        vertical_layout.addWidget(self.experiment_objects_tree)
+        self.experiment_objects_tab.setLayout(vertical_layout)
+        
+        ########################################################## RTC tab ################################################
         self.RTC_tab = QWidget()
         self.RTC_tab.layout = QGridLayout()
         self.tabWidget.addTab(self.RTC_tab, "RTC")
+        ########################################################## scan tab ################################################
         self.scan_tab = QWidget()
         self.scan_tab.layout = QGridLayout()
         self.tabWidget.addTab(self.scan_tab, "Scan")
         
-        self.experiment_objects = {}
-        self.experiment_objects_combobox = QComboBox()
-        self.experiment_objects_combobox.addItems(self.generate_all_possible_experiment_objects(fullname=True))
-        self.experiment_objects_tab.layout.addWidget(self.experiment_objects_combobox, 0, 0, 1, 1)
-            
-        add_object_button = QPushButton('Add Experiment Object')
-        add_object_button.clicked.connect(self.add_experiment_object)
-        self.experiment_objects_tab.layout.addWidget(add_object_button, 0, 1, 1, 1)
-        self.experiment_objects_tab.setLayout(self.experiment_objects_tab.layout)
 
         self.timer = QTimer()
         self.timer.setInterval(40)
@@ -75,6 +81,7 @@ class InspectionWindow(QtGui.QMainWindow):
             experiment_object_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.ScanObjects'), '{}'.format(object_to_add))
         sig = inspect.signature(experiment_object_class)
         # Create dictionary 
+        
         arguments = {}
         for param in sig.parameters.values():
             if param.default is param.empty:
@@ -86,39 +93,71 @@ class InspectionWindow(QtGui.QMainWindow):
         argument_table.setColumnCount(len(arguments.keys()))
         argument_table.setRowCount(1)
         for count, (key, value) in enumerate(arguments.items()):
-            newitem = QTableWidgetItem(value)
+            newitem = QTableWidgetItem(str(value))
             argument_table.setItem(0, count, newitem)
-            argument_table.setHorizontalHeaderItem(count, QtGui.QTableWidgetItem(key))
-        argument_table.setVerticalHeaderItem(0, QtGui.QTableWidgetItem(object_to_add))
+            argument_table.setHorizontalHeaderItem(count, QTableWidgetItem(key))
+        argument_table.setVerticalHeaderItem(0, QTableWidgetItem(object_to_add))
         argument_table.resizeColumnsToContents()
         argument_table.resizeRowsToContents()
         
-        self.define_experiment_object_dialog.verticalLayout = QtGui.QVBoxLayout(self.define_experiment_object_dialog)
-        self.define_experiment_object_dialog.verticalLayout.addWidget(argument_table)
-        self.define_experiment_object_dialog.buttonBox = QtGui.QDialogButtonBox(self.define_experiment_object_dialog)
-        self.define_experiment_object_dialog.buttonBox.setOrientation(Qt.Horizontal)
-        self.define_experiment_object_dialog.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
-        self.define_experiment_object_dialog.verticalLayout.addWidget(self.define_experiment_object_dialog.buttonBox)
-        self.define_experiment_object_dialog.buttonBox.accepted.connect(lambda: self.save_experiment_object(argument_table))
-        self.define_experiment_object_dialog.buttonBox.rejected.connect(self.define_experiment_object_dialog.close)
-        self.define_experiment_object_dialog.setLayout(self.define_experiment_object_dialog.verticalLayout)
+        verticalLayout = QVBoxLayout(self.define_experiment_object_dialog)
+        verticalLayout.addWidget(argument_table)
+        buttonBox = QDialogButtonBox(self.define_experiment_object_dialog)
+        buttonBox.setOrientation(Qt.Horizontal)
+        buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+        verticalLayout.addWidget(buttonBox)
+        buttonBox.accepted.connect(lambda: self.save_experiment_object(experiment_object_class, argument_table))
+        buttonBox.rejected.connect(self.define_experiment_object_dialog.close)
+        self.define_experiment_object_dialog.setLayout(verticalLayout)
         self.define_experiment_object_dialog.setWindowTitle("Define parameters for {}".format(object_to_add))
         self.define_experiment_object_dialog.resize(200*len(arguments.keys()), 200)
         self.define_experiment_object_dialog.show()
     
-    def save_experiment_object(self, argument_table):
-        pass
-        # args = argument_string.split(',')
-        # bad_args = [elem[:-1] for elem in args if elem[-1] == '=']
-        # # import pdb
-        # # pdb.set_trace()
-        # if bad_args:
-        #     self.define_experiment_object_dialog.warning_label.setText('Please add values for: {}'.format(*bad_args))
-        #     self.define_experiment_object_dialog.warning_label.setHidden(False)
-        #     return
-        # self.define_experiment_object_dialog.close()   
+    def save_experiment_object(self, experiment_object_class, argument_table):
+        # Generate argument dictionary from argument table
+        arguments = {}
+        for column in range(argument_table.columnCount()):
+            arguments[argument_table.horizontalHeaderItem(column).text()] = argument_table.item(0, column).text()
+            
+        # Because python doesn't allow us to enforce argument type, we need to map everything to the correct data type
+        sig = inspect.signature(experiment_object_class)
+        for key, value in arguments.items():
+            # Need some sort of error handling when the user input does not evaluate. I am not a fan of how it is right now
+            error = False
+            if not value:
+                self.define_experiment_object_dialog.close()
+                error = True
+                raise Exception("Invalid syntax in scan_values argument")
+                
+            if sig.parameters[key].default is not sig.parameters[key].empty:
+                arguments[key] = type(sig.parameters[key].default)(value) # map the argument to the type of the default argument
+            elif 'scan_values' in key:
+                try:
+                    val = eval(value)
+                    arguments[key] = val
+                except SyntaxError:
+                    error = True
+                    raise Exception("Invalid syntax in scan_values argument")
+                    
+        if not error:
+            self.experiment_objects[arguments.name] = experiment_object_class(**arguments)
+            
 
+    def update_experiment_objects_tree_widget(self):
+        # Get parent widget
+        self.parent = QTreeWidget()
     
+        # Create tree control
+        self.tree = QTreeWidget()
+        self.tree.setHeaderLabels(("Names",))
+        self.tree.setColumnWidth(0, 100)
+    
+        # Create layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.tree)
+    
+        # Populate PluginForm
+        self.parent.setLayout(layout) 
 
     def start(self):
         """
@@ -153,6 +192,6 @@ if __name__ == '__main__':
         app = QApplication.instance()
     app.setStyle('Fusion')
     MainWindow = InspectionWindow()
-    MainWindow.show()
+    MainWindow.showMaximized()
     sys.exit(app.exec_())
 # %%
