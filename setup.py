@@ -9,5 +9,5 @@ setup(
    url='https://github.com/aidanobeirne/LightWork.git',
    packages=find_packages(),  
    include_package_data=True,
-   install_requires=['PyMeasure', 'PyVISA', 'twilio', 'PyQt5', 'pyqtgraph'], #external packages as dependencies
+   install_requires=['PyMeasure', 'PyVISA', 'twilio']#, 'PyQt5', 'pyqtgraph'], #external packages as dependencies
 )
