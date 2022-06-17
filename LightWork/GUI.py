@@ -3,8 +3,8 @@ import os
 import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QLineEdit, QTabWidget, QGridLayout, QLabel, QWidget, QComboBox
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QLineEdit, QTabWidget, QGridLayout, QLabel, QWidget, QComboBox, QTableWidget, QTableWidgetItem
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 import inspect
@@ -37,7 +37,7 @@ class InspectionWindow(QtGui.QMainWindow):
         self.experiment_objects_combobox.addItems(self.generate_all_possible_experiment_objects(fullname=True))
         self.experiment_objects_tab.layout.addWidget(self.experiment_objects_combobox, 0, 0, 1, 1)
             
-        add_object_button = QPushButton('Add Experiment Objects')
+        add_object_button = QPushButton('Add Experiment Object')
         add_object_button.clicked.connect(self.add_experiment_object)
         self.experiment_objects_tab.layout.addWidget(add_object_button, 0, 1, 1, 1)
         self.experiment_objects_tab.setLayout(self.experiment_objects_tab.layout)
@@ -74,40 +74,49 @@ class InspectionWindow(QtGui.QMainWindow):
         else:
             experiment_object_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.ScanObjects'), '{}'.format(object_to_add))
         sig = inspect.signature(experiment_object_class)
-        argument_string = ''
+        # Create dictionary 
+        arguments = {}
         for param in sig.parameters.values():
             if param.default is param.empty:
-                argument_string += param.name +'=, '
+                arguments[param.name] = ''
             else:
-                argument_string += '{}={}, '.format(param.name, param.default)
-        argument_string = argument_string[:-2]
+                arguments[param.name] = param.default
                 
-        argument_string_editor = QLineEdit()
-        argument_string_editor.setText(argument_string)
-        layout = QGridLayout()
-        layout.addWidget(argument_string_editor, 0 , 0, 1, 10)
-        self.define_experiment_object_dialog.warning_label = QLabel(' ')
-        layout.addWidget(self.define_experiment_object_dialog.warning_label, 1, 1, 1, 1)
-        self.define_experiment_object_dialog.warning_label.setHidden(True)
-        done_btn = QPushButton('Done')
-        done_btn.clicked.connect(lambda: self.save_experiment_object(argument_string))
-        layout.addWidget(done_btn, 1 , 0, 1, 1)
+        argument_table = QTableWidget()
+        argument_table.setColumnCount(len(arguments.keys()))
+        argument_table.setRowCount(1)
+        for count, (key, value) in enumerate(arguments.items()):
+            newitem = QTableWidgetItem(value)
+            argument_table.setItem(0, count, newitem)
+            argument_table.setHorizontalHeaderItem(count, QtGui.QTableWidgetItem(key))
+        argument_table.setVerticalHeaderItem(0, QtGui.QTableWidgetItem(object_to_add))
+        argument_table.resizeColumnsToContents()
+        argument_table.resizeRowsToContents()
         
-        self.define_experiment_object_dialog.setLayout(layout)
+        self.define_experiment_object_dialog.verticalLayout = QtGui.QVBoxLayout(self.define_experiment_object_dialog)
+        self.define_experiment_object_dialog.verticalLayout.addWidget(argument_table)
+        self.define_experiment_object_dialog.buttonBox = QtGui.QDialogButtonBox(self.define_experiment_object_dialog)
+        self.define_experiment_object_dialog.buttonBox.setOrientation(Qt.Horizontal)
+        self.define_experiment_object_dialog.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+        self.define_experiment_object_dialog.verticalLayout.addWidget(self.define_experiment_object_dialog.buttonBox)
+        self.define_experiment_object_dialog.buttonBox.accepted.connect(lambda: self.save_experiment_object(argument_table))
+        self.define_experiment_object_dialog.buttonBox.rejected.connect(self.define_experiment_object_dialog.close)
+        self.define_experiment_object_dialog.setLayout(self.define_experiment_object_dialog.verticalLayout)
         self.define_experiment_object_dialog.setWindowTitle("Define parameters for {}".format(object_to_add))
-        self.define_experiment_object_dialog.resize(15*len(argument_string), 100)
+        self.define_experiment_object_dialog.resize(200*len(arguments.keys()), 200)
         self.define_experiment_object_dialog.show()
     
-    def save_experiment_object(self, argument_string):
-        args = argument_string.split(',')
-        bad_args = [elem[:-1] for elem in args if elem[-1] == '=']
-        # import pdb
-        # pdb.set_trace()
-        if bad_args:
-            self.define_experiment_object_dialog.warning_label.setText('Please add values for: {}'.format(*bad_args))
-            self.define_experiment_object_dialog.warning_label.setHidden(False)
-            return
-        self.define_experiment_object_dialog.close()   
+    def save_experiment_object(self, argument_table):
+        pass
+        # args = argument_string.split(',')
+        # bad_args = [elem[:-1] for elem in args if elem[-1] == '=']
+        # # import pdb
+        # # pdb.set_trace()
+        # if bad_args:
+        #     self.define_experiment_object_dialog.warning_label.setText('Please add values for: {}'.format(*bad_args))
+        #     self.define_experiment_object_dialog.warning_label.setHidden(False)
+        #     return
+        # self.define_experiment_object_dialog.close()   
 
     
 
