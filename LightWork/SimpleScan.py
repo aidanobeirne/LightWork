@@ -11,7 +11,7 @@ from twilio.rest import Client
 
 
 class SimpleScan:
-    def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False, laser_SN='37005097',
+    def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
                  savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
                  notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
@@ -67,7 +67,7 @@ class SimpleScan:
             os.makedirs(savepath)
         if laser_shutter:
             from LightWork.ParentClasses.ThorlabsStages.ThorlabsStages import LaserShutter
-            self.shutter = LaserShutter(laser_SN)
+            self.shutter = LaserShutter(laser_shutter_SN)
 
         self.generate_scan_list()
 
