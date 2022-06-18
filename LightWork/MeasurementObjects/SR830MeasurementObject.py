@@ -19,9 +19,9 @@ from LightWork.ParentClasses import SR830
 #
     
 class SR830MeasurementObject(SR830):
-    def __init__(self, port='GPIB0::11::INSTR', TC=0, sens=0, TCs_to_wait=9.23, navg=50):
+    def __init__(self, name='SR830', port='GPIB0::11::INSTR', TC=0, sens=0, TCs_to_wait=9.23, navg=50):
         super().__init__(port=port, read_termination='\r')
-        self.scan_instrument_name = 'SR830'
+        self.scan_instrument_name = name
         self.setTC(TC)
         self.setsens(sens)
         self.meta_data = {}
@@ -48,8 +48,8 @@ class SR830MeasurementObject(SR830):
         self.meta_data['sensitivity'] = self.getsens()
 
         # any values that cannot be directly read off the LockIn are updated where the sentinel value is None
-        self.meta_data['TCs_to_wait'] = TCs TCs_to_wait if TCs_to_wait is not None
-        self.meta_data['navg'] = navg if navg is not None
+        self.meta_data['TCs_to_wait'] = TCs_to_wait if TCs_to_wait is not None else self.meta_data['TCs_to_wait']
+        self.meta_data['navg'] = navg if navg is not None else self.meta_data['navg']
         
 
         

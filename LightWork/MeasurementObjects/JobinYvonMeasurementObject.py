@@ -9,7 +9,7 @@ from LightWork.ParentClasses.OldJYScripts.ccd3000_visa import *
     
 
 class JobinYvonMeasurementObject():
-    def __init__(self, exposure_in_s=1, grating=1, use_synapse=1, numavgs=1, center_wl =700, 
+    def __init__(self, name='Jobin Yvon', exposure_in_s=1, grating=1, use_synapse=1, numavgs=1, center_wl =700, 
                 ystart=125, yend=165, slitwidth_mm=1.0):
         self.meta_data = {'exposure': exposure_in_s,
                         'grating': grating,
@@ -20,7 +20,7 @@ class JobinYvonMeasurementObject():
                         'center_wl': center_wl
                         }
 
-        self.scan_instrument_name = 'JobinYvon'
+        self.scan_instrument_name = name
 
         # Some really ugly initialization code below that i adapted...
         if use_synapse:

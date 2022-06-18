@@ -5,7 +5,7 @@ import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget
+from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem
 import pyqtgraph as pg
 # from PyQt5 import QtGui
 import inspect
@@ -22,21 +22,24 @@ class InspectionWindow(QMainWindow):
         self.setWindowTitle('Light Work')
 
         ########################################################## experiment objects tab ################################################
-        self.experiment_objects_tab = QWidget()
-        self.tabWidget.addTab(self.experiment_objects_tab, "Experiment Objects")
+        self.instruments_tab = QWidget()
+        self.tabWidget.addTab(self.instruments_tab, "Experiment Objects")
         vertical_layout = QVBoxLayout()
-        self.experiment_objects = {}
-        self.experiment_objects_combobox = QComboBox()
-        self.experiment_objects_combobox.addItems(self.generate_all_possible_experiment_objects(fullname=True))
+        self.instruments = {}
+        self.instruments_combobox = QComboBox()
+        self.instruments_combobox.addItems(self.generate_all_possible_instruments(fullname=True))
         horizontal_layout = QHBoxLayout()
-        horizontal_layout.addWidget(self.experiment_objects_combobox)
+        horizontal_layout.addWidget(self.instruments_combobox)
         add_object_button = QPushButton('Add Experiment Object')
-        add_object_button.clicked.connect(self.add_experiment_object)
+        add_object_button.clicked.connect(self.add_instrument)
         horizontal_layout.addWidget(add_object_button)
-        vertical_layout.addWidget(horizontal_layout)
-        self.experiment_objects_tree = QTreeWidget()
-        vertical_layout.addWidget(self.experiment_objects_tree)
-        self.experiment_objects_tab.setLayout(vertical_layout)
+        delete_object_button = QPushButton('Delete Experiment Object')
+        delete_object_button.clicked.connect(self.delete_instrument)
+        horizontal_layout.addWidget(delete_object_button)
+        vertical_layout.addLayout(horizontal_layout)
+        self.instruments_tree = QTreeWidget()
+        vertical_layout.addWidget(self.instruments_tree)
+        self.instruments_tab.setLayout(vertical_layout)
         
         ########################################################## RTC tab ################################################
         self.RTC_tab = QWidget()
@@ -65,21 +68,24 @@ class InspectionWindow(QMainWindow):
             names.append(name)
         return names
     
-    def generate_all_possible_experiment_objects(self, fullname=True):
+    def generate_all_possible_instruments(self, fullname=True):
         object_options = self.all_classes_in_dir(os.path.dirname(s.__file__))
         object_options.extend(self.all_classes_in_dir(os.path.dirname(m.__file__)))
         if fullname == False:
             object_options = [i.split('MeasurementObject')[0].split('ScanObject')[0]for i in object_options]
         return object_options
 
-    def add_experiment_object(self):
-        self.define_experiment_object_dialog = QDialog()
-        object_to_add = self.experiment_objects_combobox.currentText()
+    def delete_instrument(self):
+        pass
+
+    def add_instrument(self):
+        self.define_instrument_dialog = QDialog()
+        object_to_add = self.instruments_combobox.currentText()
         if 'Measurement' in object_to_add:
-            experiment_object_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.MeasurementObjects'), '{}'.format(object_to_add))
+            instrument_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.MeasurementObjects'), '{}'.format(object_to_add))
         else:
-            experiment_object_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.ScanObjects'), '{}'.format(object_to_add))
-        sig = inspect.signature(experiment_object_class)
+            instrument_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.ScanObjects'), '{}'.format(object_to_add))
+        sig = inspect.signature(instrument_class)
         # Create dictionary 
         
         arguments = {}
@@ -100,32 +106,32 @@ class InspectionWindow(QMainWindow):
         argument_table.resizeColumnsToContents()
         argument_table.resizeRowsToContents()
         
-        verticalLayout = QVBoxLayout(self.define_experiment_object_dialog)
+        verticalLayout = QVBoxLayout(self.define_instrument_dialog)
         verticalLayout.addWidget(argument_table)
-        buttonBox = QDialogButtonBox(self.define_experiment_object_dialog)
+        buttonBox = QDialogButtonBox(self.define_instrument_dialog)
         buttonBox.setOrientation(Qt.Horizontal)
         buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
         verticalLayout.addWidget(buttonBox)
-        buttonBox.accepted.connect(lambda: self.save_experiment_object(experiment_object_class, argument_table))
-        buttonBox.rejected.connect(self.define_experiment_object_dialog.close)
-        self.define_experiment_object_dialog.setLayout(verticalLayout)
-        self.define_experiment_object_dialog.setWindowTitle("Define parameters for {}".format(object_to_add))
-        self.define_experiment_object_dialog.resize(200*len(arguments.keys()), 200)
-        self.define_experiment_object_dialog.show()
+        buttonBox.accepted.connect(lambda: self.save_instrument(instrument_class, argument_table))
+        buttonBox.rejected.connect(self.define_instrument_dialog.close)
+        self.define_instrument_dialog.setLayout(verticalLayout)
+        self.define_instrument_dialog.setWindowTitle("Define parameters for {}".format(object_to_add))
+        self.define_instrument_dialog.resize(200*len(arguments.keys()), 200)
+        self.define_instrument_dialog.show()
     
-    def save_experiment_object(self, experiment_object_class, argument_table):
+    def save_instrument(self, instrument_class, argument_table):
         # Generate argument dictionary from argument table
         arguments = {}
         for column in range(argument_table.columnCount()):
             arguments[argument_table.horizontalHeaderItem(column).text()] = argument_table.item(0, column).text()
             
         # Because python doesn't allow us to enforce argument type, we need to map everything to the correct data type
-        sig = inspect.signature(experiment_object_class)
+        sig = inspect.signature(instrument_class)
         for key, value in arguments.items():
             # Need some sort of error handling when the user input does not evaluate. I am not a fan of how it is right now
             error = False
             if not value:
-                self.define_experiment_object_dialog.close()
+                self.define_instrument_dialog.close()
                 error = True
                 raise Exception("Invalid syntax in scan_values argument")
                 
@@ -140,24 +146,26 @@ class InspectionWindow(QMainWindow):
                     raise Exception("Invalid syntax in scan_values argument")
                     
         if not error:
-            self.experiment_objects[arguments.name] = experiment_object_class(**arguments)
+            self.instruments[arguments['name']] = instrument_class(**arguments)
+            self.update_instruments_tree_widget(arguments)
+            self.define_instrument_dialog.close()
             
 
-    def update_experiment_objects_tree_widget(self):
-        # Get parent widget
-        self.parent = QTreeWidget()
+    def update_instruments_tree_widget(self, arguments):
+        instrument_key = arguments['name']
+        item_to_add = QTreeWidgetItem([instrument_key])
+        print(arguments['scan_values'])
+        for key, value in arguments.items():
+            value_child = QTreeWidgetItem()
+            value_child.setText(0, str(value))
+            key_child = QTreeWidgetItem()
+            key_child.setText(0, str(key))
+            key_child.addChild(value_child)
+            item_to_add.addChild(key_child)
+        self.instruments_tree.addTopLevelItem(item_to_add)
+        item_to_add.setExpanded(True)
     
-        # Create tree control
-        self.tree = QTreeWidget()
-        self.tree.setHeaderLabels(("Names",))
-        self.tree.setColumnWidth(0, 100)
-    
-        # Create layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.tree)
-    
-        # Populate PluginForm
-        self.parent.setLayout(layout) 
+        
 
     def start(self):
         """

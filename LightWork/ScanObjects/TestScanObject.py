@@ -4,7 +4,7 @@ import sys
 import os
 
 class TestScanObject():
-    def __init__(self, scan_values, name='1', scan_nest_index=0):
+    def __init__(self, scan_values, name='Test scan instrument', scan_nest_index=0):
         """
         
         Parameters
@@ -26,7 +26,7 @@ class TestScanObject():
         self.meta_data = {'some parameter': 0.1}
         self.scan_values = list(scan_values)
         self.scan_nest_index = scan_nest_index
-        self.scan_instrument_name = 'testscanobject_{}'.format(name)
+        self.scan_instrument_name = name
         
     def set_scan_value(self, value):
         print()

@@ -10,12 +10,12 @@ import signal
 
 
 class AndorMeasurementObject():
-    def __init__(self, exposure_in_s=1, vcent=120, vheight=21, AcquisitionMode=1, Readmode=3, temperature=-89, wait_to_cool=True, path_to_domain=None):
+    def __init__(self, name='andor', exposure_in_s=1, vcent=120, vheight=21, AcquisitionMode=1, Readmode=3, temperature=-89, wait_to_cool=True, path_to_domain=None):
         self.meta_data = {}
         self.meta_data['exposure'] = exposure_in_s
         self.meta_data['vcent'] = vcent
         self.meta_data['vheight'] = vheight
-        self.scan_instrument_name = 'andor'
+        self.scan_instrument_name = name
         self.cam = andor.Andor()
         signal.signal(signal.SIGINT, self.signal_handler)
         self.cam.SetTriggerMode(0)

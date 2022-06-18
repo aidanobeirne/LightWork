@@ -4,7 +4,7 @@ from LightWork.ParentClasses.ThorlabsStages.ThorlabsStages import ThorlabsCageRo
 
 
 class CageRotatorScanObject(ThorlabsCageRotator):
-    def __init__(self, scan_values, SN_motor='55164244', name='analyzer', scan_nest_index=0):
+    def __init__(self, scan_values, SN_motor='55164244', name='Cage Rotator', scan_nest_index=0):
         """
     
         Parameters
@@ -28,7 +28,7 @@ class CageRotatorScanObject(ThorlabsCageRotator):
         self.meta_data = {'name':name}
         self.scan_values = list(scan_values)
         self.scan_nest_index=scan_nest_index
-        self.scan_instrument_name = 'CageRotator_{}'.format(name)
+        self.scan_instrument_name = name
         
     def set_scan_value(self, value):
         self.moveToDeg(value)
