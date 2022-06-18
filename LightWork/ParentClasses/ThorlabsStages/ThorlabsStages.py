@@ -8,6 +8,22 @@ Created on Mon Jan 13 15:16:26 2020
 
 # ATTENTION!!! Might need to have a blocking move funciton for all stages
 
+import importlib
+import sys
+import os
+import clr
+importlib.reload(clr)
+import time
+from time import sleep
+from System import Decimal, UInt32
+dll_path = os.path.dirname(__file__)
+sys.path.append(r'{}'.format(dll_path))
+clr.AddReference('Thorlabs.MotionControl.DeviceManagerCLI')
+clr.AddReference('Thorlabs.MotionControl.GenericPiezoCLI')
+clr.AddReference('Thorlabs.MotionControl.Benchtop.PiezoCLI')
+clr.AddReference('Thorlabs.MotionControl.GenericMotorCLI')
+clr.AddReference('Thorlabs.MotionControl.Benchtop.BrushlessMotorCLI')
+
 from Thorlabs.MotionControl.KCube.DCServoCLI import KCubeDCServo
 from Thorlabs.MotionControl.IntegratedStepperMotorsCLI import CageRotator
 from Thorlabs.MotionControl.GenericMotorCLI import Settings
