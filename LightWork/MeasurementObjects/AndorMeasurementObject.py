@@ -43,7 +43,8 @@ class AndorMeasurementObject():
         if wait_to_cool:
             while 'DRV_TEMP_STABILIZED' not in self.cam.GetTemperature():
                 print("\rTemperature is = {}C, status is = {}".format(self.cam.temperature, self.cam.GetTemperature()), end='\r', flush=True)
-                time.sleep(10)   
+                time.sleep(10) 
+            print()  
             print('STABILIZED')
             
     def measure(self):

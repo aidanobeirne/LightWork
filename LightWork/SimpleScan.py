@@ -134,9 +134,8 @@ class SimpleScan:
                 percent_complete = count/len(self.scan_values)
                 total_time_estimate = time_so_far/percent_complete
                 time_remaining = (total_time_estimate-time_so_far)/3600
-                # print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
-                print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(
-                    time_remaining)), int(np.rint(60*(time_remaining % 1)))), end='\r', flush=True)
+                print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
+                # print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining % 1)))), end='\r', flush=True)
             # set scan values for every scan instrument
             for inst, value in zip(self.scan_instruments, values):
                 inst.set_scan_value(value)
