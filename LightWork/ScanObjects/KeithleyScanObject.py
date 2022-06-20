@@ -41,6 +41,9 @@ class KeithleyScanObject(Keithley2400):
     def set_scan_value(self, value):
         self.ramp_to_voltage_step_size(value, step_size=0.01, pause=0.01)
 
+    def get_scan_value(self):
+        return 'voltage', self.voltage[0]
+
     def get_save_data(self, value=None):
         currents = []
         for i in range(30):

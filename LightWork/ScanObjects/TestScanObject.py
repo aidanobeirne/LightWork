@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import random
 import sys
 import os
 
@@ -34,6 +35,9 @@ class TestScanObject():
 	
     def get_save_data(self, value):
         return {'dat1':value, 'dat2':10}
+
+    def get_scan_value(self):
+        return 'Test units', random.uniform(0,1)
 	
     def close(self):
         pass

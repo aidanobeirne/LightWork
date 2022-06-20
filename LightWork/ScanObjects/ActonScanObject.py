@@ -13,6 +13,9 @@ class ActonScanObject(Acton):
         
     def set_scan_value(self, value):
         self.wavelength_nm = value
+    
+    def get_scan_value(self):
+        return 'wavelength [nm]', self.wavelength_nm
 	
     def get_save_data(self, value):
         return {'scan wavelength [nm]': value, 'Acton readout wavelength [nm]' : self.wavelength_nm}

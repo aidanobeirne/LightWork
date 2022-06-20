@@ -32,6 +32,9 @@ class CageRotatorScanObject(ThorlabsCageRotator):
         
     def set_scan_value(self, value):
         self.moveToDeg(value)
+
+    def get_scan_value(self):
+        return 'degrees'. self.getRotation()
 	
     def get_save_data(self, value):
         return {'angle [degrees]: value'}

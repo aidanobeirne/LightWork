@@ -36,6 +36,9 @@ class SolsTiSScanObject(Solstis):
         data = {'scan wavelength [nm]': value , 'wavemeter wavelength [nm]' : self.wavemeter_wl}
         return data
 	
+    def get_scan_value(self):
+        return 'Not Yet Implemented', 'Not Yet Implemented!'
+
     def close(self):
         pass
 		

@@ -5,10 +5,11 @@ import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QDockWidget, QLineEdit, QLabel
 import pyqtgraph as pg
 # from PyQt5 import QtGui
 import inspect
+import sip
 # Switch to using white background and black foreground
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -43,14 +44,14 @@ class InspectionWindow(QMainWindow):
         
         ########################################################## RTC tab ################################################
         self.RTC_tab = QWidget()
-        self.RTC_tab.layout = QGridLayout()
+        self.RTC_tab.layout = QHBoxLayout()
+        self.RTC_tab.setLayout(self.RTC_tab.layout)
         self.tabWidget.addTab(self.RTC_tab, "RTC")
         ########################################################## scan tab ################################################
         self.scan_tab = QWidget()
         self.scan_tab.layout = QGridLayout()
         self.tabWidget.addTab(self.scan_tab, "Scan")
         
-
         self.timer = QTimer()
         self.timer.setInterval(40)
         self.timer.timeout.connect(self.eventLoop)
@@ -76,7 +77,12 @@ class InspectionWindow(QMainWindow):
         return object_options
 
     def delete_instrument(self):
-        pass
+        current = self.instruments_tree.currentItem()
+        while current.parent():
+            current = current.parent()
+        name = current.text(0)
+        sip.delete(current)
+        del self.instruments[name]
 
     def add_instrument(self):
         self.define_instrument_dialog = QDialog()
@@ -87,14 +93,13 @@ class InspectionWindow(QMainWindow):
             instrument_class = getattr(importlib.import_module('.{}'.format(object_to_add), 'LightWork.ScanObjects'), '{}'.format(object_to_add))
         sig = inspect.signature(instrument_class)
         # Create dictionary 
-        
         arguments = {}
         for param in sig.parameters.values():
             if param.default is param.empty:
                 arguments[param.name] = ''
             else:
                 arguments[param.name] = param.default
-                
+        # Create argument table
         argument_table = QTableWidget()
         argument_table.setColumnCount(len(arguments.keys()))
         argument_table.setRowCount(1)
@@ -146,15 +151,14 @@ class InspectionWindow(QMainWindow):
                     raise Exception("Invalid syntax in scan_values argument")
                     
         if not error:
+            self.define_instrument_dialog.close()
             self.instruments[arguments['name']] = instrument_class(**arguments)
             self.update_instruments_tree_widget(arguments)
-            self.define_instrument_dialog.close()
+            self.generate_RTC_widget(arguments['name'])
             
-
     def update_instruments_tree_widget(self, arguments):
         instrument_key = arguments['name']
         item_to_add = QTreeWidgetItem([instrument_key])
-        print(arguments['scan_values'])
         for key, value in arguments.items():
             value_child = QTreeWidgetItem()
             value_child.setText(0, str(value))
@@ -165,7 +169,25 @@ class InspectionWindow(QMainWindow):
         self.instruments_tree.addTopLevelItem(item_to_add)
         item_to_add.setExpanded(True)
     
+    def generate_RTC_widget(self, name):
+        # get instance of instrument to generate
+        inst = self.instruments[name]
         
+        if 'Measurement'in name:
+            pass
+        else:
+            units, current_value = inst.get_scan_value()
+            
+            layout = QVBoxLayout()
+            layout.addWidget(QLabel('{}'.format(name)))
+            text = QLineEdit()
+            text.setText(str(current_value))
+            layout.addWidget(text)
+            button = QPushButton('Go to {}'.format(units))
+            button.clicked.connect(lambda: inst.set_scan_value(float(text.text())))
+            layout.addWidget(button)
+            self.RTC_tab.layout.addLayout(layout)
+            
 
     def start(self):
         """
