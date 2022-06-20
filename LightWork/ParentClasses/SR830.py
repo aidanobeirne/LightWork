@@ -19,7 +19,7 @@ class SR830:
             self.instr = rm.open_resource(port)
             self.instr.clear()
         except:
-            print('Intrument unavailable. Available instruments:')
+            print('Instrument unavailable. Available instruments:')
             resources = rm.list_resources()
             for item in resources:
                 print(item)
