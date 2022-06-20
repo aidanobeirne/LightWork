@@ -49,7 +49,7 @@ class SR830MeasurementObject(SR830):
         self.meta_data['sensitivity'] = self.getsens()
 
         # any values that cannot be directly read off the LockIn are updated where the sentinel value is None
-        self.meta_data['TCs_to_wait'] = TCs_to_wait if TCs_to_wait is not None else self.meta_data['TCs_to_wait']
+        self.meta_data['TCs to wait'] = TCs_to_wait if TCs_to_wait is not None else self.meta_data['TCs to wait']
         self.meta_data['navg'] = navg if navg is not None else self.meta_data['navg']
 
     def close(self):
