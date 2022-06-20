@@ -141,6 +141,7 @@ class Solstis():
       Returns:
         Nothing
       """
+      wavelength = float(wavelength)
       self.send_msg(transmission_id,"move_wave_t", {"wavelength": [wavelength]})
       val = self.recv_msg()
       self.verify_msg(val,transmission_id=transmission_id,op="move_wave_t_reply")
