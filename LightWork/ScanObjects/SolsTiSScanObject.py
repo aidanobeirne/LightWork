@@ -5,8 +5,8 @@ import socket
 
 
 class SolsTiSScanObject(Solstis):
-    def __init__(self, scan_values, name='SolsTiS', address='192.168.1.222', port=39900, scan_nest_index=0, wavemeter=True):
-        super().__init__(address=address, port=port)
+    def __init__(self, scan_values, name='SolsTiS', address='192.168.1.222', port=39900, scan_nest_index=0, wavemeter=True, timeout_in_s=60):
+        super().__init__(address=address, port=port, timeout_in_s=timeout_in_s)
         self.meta_data = {}
         self.scan_values = list(scan_values)
         self.scan_nest_index = scan_nest_index

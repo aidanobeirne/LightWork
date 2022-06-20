@@ -17,10 +17,10 @@ class SolstisError(Exception):
     self.message = message
 
 class Solstis():
-    def __init__(self, address='192.168.1.222', port=39900):
+    def __init__(self, address='192.168.1.222', port=39900, timeout_in_s=60):
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
           self.sock.connect((address, port))
-          self.sock.settimeout(30)
+          self.sock.settimeout(timeout_in_s)
           self.start_link()
           
           
