@@ -15,7 +15,6 @@ class SimpleScan:
                  savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
                  notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
-
         Parameters
         ----------
         measurement_instrument : MeasurementObject (currently the only options are AndorMeasurementObject or SR830MeasurementObject)
@@ -134,7 +133,8 @@ class SimpleScan:
                 percent_complete = count/len(self.scan_values)
                 total_time_estimate = time_so_far/percent_complete
                 time_remaining = (total_time_estimate-time_so_far)/3600
-                print('estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining%1)))))
+                print('estimated {} hours and {} minutes remaining'.format(
+                    int(np.floor(time_remaining)), int(np.rint(60*(time_remaining % 1)))))
                 # print('\r estimated {} hours and {} minutes remaining'.format(int(np.floor(time_remaining)), int(np.rint(60*(time_remaining % 1)))), end='\r', flush=True)
             # set scan values for every scan instrument
             for inst, value in zip(self.scan_instruments, values):
@@ -159,14 +159,15 @@ class SimpleScan:
         scan_time = np.round((time.time()-start_time)/3600, 2)
         print()
         print('Scan took {} hours and {} minutes'.format(
-            np.floor(scan_time), np.rint(60*(scan_time % 1))))
+            int(np.floor(scan_time)), int(np.rint(60*(scan_time % 1)))))
         self.meta_data['Scan time'] = '{} hours and {} minutes'.format(
-            np.floor(scan_time), np.rint(60*(scan_time % 1)))
+            int(np.floor(scan_time)), int(np.rint(60*(scan_time % 1))))
         self.final_save(self.master_data)
 
         # close shutter
         try:
             self.shutter.flipperOff()
+            self.shutter.close()
         except AttributeError:
             pass
 
