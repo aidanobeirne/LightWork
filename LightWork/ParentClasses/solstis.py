@@ -46,7 +46,6 @@ class Solstis():
         print(send_message)
       self.sock.sendall(send_message)
 
-
     def recv_msg(self, timeout=10.):
       global next_data
       i = 0 #Index
