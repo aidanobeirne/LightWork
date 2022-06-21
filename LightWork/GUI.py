@@ -5,7 +5,8 @@ import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QDockWidget, QLineEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QSpinBox, QCheckBox, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QLineEdit, QLabel
+from LightWork.ParentClasses.SpecPlotGUIElement import SpecPlotGUIElement
 import pyqtgraph as pg
 # from PyQt5 import QtGui
 import inspect
@@ -44,6 +45,7 @@ class InspectionWindow(QMainWindow):
         
         ########################################################## RTC tab ################################################
         self.RTC_tab = QWidget()
+        self.RTC_widgets = {}
         self.RTC_tab.layout = QHBoxLayout()
         self.RTC_tab.setLayout(self.RTC_tab.layout)
         self.tabWidget.addTab(self.RTC_tab, "RTC")
@@ -58,7 +60,21 @@ class InspectionWindow(QMainWindow):
         self.timer.start()
 
     def eventLoop(self):
-        pass
+        # Check if a measurement inst is in the instruments dict
+        instrument_classes = [type(i).__name__ for i in self.instruments.keys()]
+        
+        for i, elem in enumerate(instrument_classes):
+            if 'Measurement' in elem:
+                name = self.instruments[list(self.instruments.keys())[i]]['name']
+        
+        try:
+            if self.RTC_widgets['{}_RTC_checkbox'.format(name)].isChecked():
+                pass
+            # acquire data and update plot
+
+        except (AttributeError, NameError) as e:
+            pass
+                    
 
     def all_classes_in_dir(self, dir):
         names = []
@@ -81,6 +97,17 @@ class InspectionWindow(QMainWindow):
         while current.parent():
             current = current.parent()
         name = current.text(0)
+        inst_class_name = type(current).__name__
+        if 'Measurement' in inst_class_name:
+            sip.delete(self.RTC_widgets['{}_SpecPlot'.format(name)])
+            sip.delete(self.RTC_widgets['{}_exposure'.format(name)])
+            sip.delete(self.RTC_widgets['{}_RTC_checkbox'.format(name)])
+            sip.delete(self.RTC_widgets['{}_layout'.format(name)])
+        else:
+            sip.delete(self.RTC_widgets['{}_label'.format(name)])
+            sip.delete(self.RTC_widgets['{}_text_input'.format(name)] )
+            sip.delete(self.RTC_widgets['{}_button'.format(name)])
+            sip.delete(self.RTC_widgets['{}_layout'.format(name)])
         sip.delete(current)
         del self.instruments[name]
 
@@ -129,8 +156,8 @@ class InspectionWindow(QMainWindow):
         arguments = {}
         for column in range(argument_table.columnCount()):
             arguments[argument_table.horizontalHeaderItem(column).text()] = argument_table.item(0, column).text()
-            
-        # Because python doesn't allow us to enforce argument type, we need to map everything to the correct data type
+        
+        # map everything to the correct data type
         sig = inspect.signature(instrument_class)
         for key, value in arguments.items():
             # Need some sort of error handling when the user input does not evaluate. I am not a fan of how it is right now
@@ -149,7 +176,11 @@ class InspectionWindow(QMainWindow):
                 except SyntaxError:
                     error = True
                     raise Exception("Invalid syntax in scan_values argument")
-                    
+        # import pdb; pdb.set_trace()
+        if arguments['name'] in self.instruments.keys():
+            error = True
+            raise Exception("Name is already assigned to an instrument")
+            
         if not error:
             self.define_instrument_dialog.close()
             self.instruments[arguments['name']] = instrument_class(**arguments)
@@ -172,23 +203,41 @@ class InspectionWindow(QMainWindow):
     def generate_RTC_widget(self, name):
         # get instance of instrument to generate
         inst = self.instruments[name]
-        
-        if 'Measurement'in name:
-            pass
+        inst_class_name = type(inst).__name__
+        if 'Measurement'in inst_class_name:
+            SpecPlot = SpecPlotGUIElement()
+            SpecPlot.setData([650,750,850],[1,1,1])
+            exposure = QSpinBox()
+            exposure.setText('Exposure in s')
+            RTC_checkbox = QCheckBox()
+            RTC_checkbox.setText('Begin RTC')
+            layout = QVBoxLayout()
+            layout.addWidget(SpecPlot)
+            layout.addWidget(exposure)
+            layout.addWidget(RTC_checkbox)
+            self.RTC_widgets['{}_SpecPlot'.format(name)] = SpecPlot
+            self.RTC_widgets['{}_exposure'.format(name)] = exposure
+            self.RTC_widgets['{}_RTC_checkbox'.format(name)] = RTC_checkbox
+            self.RTC_widgets['{}_layout'.format(name)] = layout
+            self.RTC_tab.layout.addLayout(layout)
         else:
             units, current_value = inst.get_scan_value()
-            
             layout = QVBoxLayout()
-            layout.addWidget(QLabel('{}'.format(name)))
-            text = QLineEdit()
-            text.setText(str(current_value))
-            layout.addWidget(text)
+            label = QLabel('{}'.format(name))
+            layout.addWidget(label)
+            text_input = QLineEdit()
+            text_input.setText(str(current_value))
+            layout.addWidget(text_input)
             button = QPushButton('Go to {}'.format(units))
-            button.clicked.connect(lambda: inst.set_scan_value(float(text.text())))
+            button.clicked.connect(lambda: inst.set_scan_value(float(text_input.text())))
             layout.addWidget(button)
+            #Store widgets in dict so that they can be referenced later
+            self.RTC_widgets['{}_label'.format(name)] = label
+            self.RTC_widgets['{}_text_input'.format(name)] = text_input
+            self.RTC_widgets['{}_button'.format(name)] = button
+            self.RTC_widgets['{}_layout'.format(name)] = layout
             self.RTC_tab.layout.addLayout(layout)
             
-
     def start(self):
         """
         Enable scanning by setting the global flag to True.
