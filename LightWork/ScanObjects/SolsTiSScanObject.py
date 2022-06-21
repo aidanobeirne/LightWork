@@ -30,6 +30,7 @@ class SolsTiSScanObject(Solstis):
             print(self.wavemeter_wl)
         else:
             self.move_wave_t(value)
+            print(value)
             self.wavemeter_wl = 0
 	
     def get_save_data(self, value):
