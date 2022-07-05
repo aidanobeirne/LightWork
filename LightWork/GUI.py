@@ -4,19 +4,52 @@ import os
 import importlib
 import LightWork.MeasurementObjects.TestMeasurementObject as m
 import LightWork.ScanObjects.TestScanObject as s
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, QSpinBox, QCheckBox, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QLineEdit, QLabel
+from PyQt5.QtCore import QTimer, Qt, QObject, QThread, pyqtSignal
+from PyQt5.QtWidgets import (QApplication, QPushButton, QDialog, QTabWidget, QGridLayout, QWidget, QComboBox, QTableWidget, 
+                             QDoubleSpinBox, QCheckBox, QTableWidgetItem, QMainWindow, QDialogButtonBox, QVBoxLayout, QHBoxLayout, 
+                             QTreeWidget, QTreeWidgetItem, QLineEdit, QLabel
+                             )
 from LightWork.ParentClasses.SpecPlotGUIElement import SpecPlotGUIElement
 import pyqtgraph as pg
-# from PyQt5 import QtGui
 import inspect
 import sip
+import time
 # Switch to using white background and black foreground
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
+# Real-time-capture Worker thread class
+class Worker(QObject):
+    data = pyqtSignal(object)
+    def __init__(self, exposure):
+        super().__init__()
+        self.exposure = exposure
+        self.yaxis_key = None
+        self.measurement_instrument = None
+        self.poller = QTimer(self) # setting up a timer to substitute the need of a while loop for the RTC
+        self.poller.timeout.connect(self._polling_routine) # this is the function the timer calls upon on every timeout
+        
+    # def _polling_routine(self):
+    #     time.sleep(2)
+    #     dat = np.random.randint(0,10)
+    #     print(dat)
+    #     self.data.emit(dat) # replace with camera acquisition
+        
+    def _polling_routine(self):
+        dat = self.measurement_instrument.measure()[self.yaxis_key]
+        self.data.emit(dat) 
+    
+    def polling_toggle(self):
+        if self.poller.isActive():
+            self.poller.stop()
+        else:
+            self.poller.start(self.exposure)
+    
 
+# Main window class
 class InspectionWindow(QMainWindow):
+    RTC_emit_start =  pyqtSignal(str)
+    RTC_emit_stop = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.tabWidget = QTabWidget()
@@ -44,6 +77,7 @@ class InspectionWindow(QMainWindow):
         self.instruments_tab.setLayout(vertical_layout)
         
         ########################################################## RTC tab ################################################
+        self.RTC_plot_domain = None # use none as sentinel value
         self.RTC_tab = QWidget()
         self.RTC_widgets = {}
         self.RTC_tab.layout = QHBoxLayout()
@@ -58,24 +92,38 @@ class InspectionWindow(QMainWindow):
         self.timer.setInterval(40)
         self.timer.timeout.connect(self.eventLoop)
         self.timer.start()
+    
+    def toggle_RTC(self):
+        # need to clean this up and find a way to generalize to all instruments...
+        if self.RTC_widgets['{}_RTC_checkbox'.format(self.measurement_instrument_name)].isChecked():
+            self.worker.measurement_instrument = self.instruments[self.measurement_instrument_name]
+            self.worker.measurement_instument.exposure_in_s = self.RTC_widgets['{}_exposure'.format(self.measurement_instrument_name)].value()
+            self.worker.exposure = self.RTC_widgets['{}_exposure'.format(self.measurement_instrument_name)].value()
+            self.worker.yaxis_key = self.RTC_widgets['{}_yaxis_combobox'.format(self.measurement_instrument_name)].text()
+            self.RTC_emit_start.emit()
+        else:
+            self.RTC_emit_stop.emit()
+    
+    def update_RTC_plot(self, data):
+        # Need to execute this correctly
+        if self.RTC_plot_domain is not None:
+            self.RTC_widgets['{}_SpecPlot'.format(self.measurement_instrument_name)].setData(self.RTC_plot_domain, data)
+        else:
+            print(data)
+      
+    def create_RTC_worker_thread(self, measurement_instrument, yaxis_key, exposure):    
+        self.thread = QThread()
+        self.worker = Worker(measurement_instrument, yaxis_key, exposure)
+        self.worker.moveToThread(self.thread)
+        self.worker.data.connect(self.update_RTC_plot) 
+        self.RTC_emit_start.connect(self.worker.polling_toggle)
+        self.RTC_emit_stop.connect(self.worker.polling_toggle)
+
+        self.thread.start()
 
     def eventLoop(self):
-        # Check if a measurement inst is in the instruments dict
-        instrument_classes = [type(i).__name__ for i in self.instruments.keys()]
-        
-        for i, elem in enumerate(instrument_classes):
-            if 'Measurement' in elem:
-                name = self.instruments[list(self.instruments.keys())[i]]['name']
-        
-        try:
-            if self.RTC_widgets['{}_RTC_checkbox'.format(name)].isChecked():
-                pass
-            # acquire data and update plot
-
-        except (AttributeError, NameError) as e:
-            pass
-                    
-
+        pass
+            
     def all_classes_in_dir(self, dir):
         names = []
         for file in glob.glob(os.path.join(dir, '*.py')):
@@ -100,9 +148,12 @@ class InspectionWindow(QMainWindow):
         inst_class_name = type(current).__name__
         if 'Measurement' in inst_class_name:
             sip.delete(self.RTC_widgets['{}_SpecPlot'.format(name)])
+            sip.delete(self.RTC_widgets['{}_exposure_label'.format(name)])
             sip.delete(self.RTC_widgets['{}_exposure'.format(name)])
+            sip.delete(self.RTC_widgets['{}_yaxis_combobox'.format(name)])
             sip.delete(self.RTC_widgets['{}_RTC_checkbox'.format(name)])
             sip.delete(self.RTC_widgets['{}_layout'.format(name)])
+            del self.RTC_plot_domain
         else:
             sip.delete(self.RTC_widgets['{}_label'.format(name)])
             sip.delete(self.RTC_widgets['{}_text_input'.format(name)] )
@@ -148,7 +199,7 @@ class InspectionWindow(QMainWindow):
         buttonBox.rejected.connect(self.define_instrument_dialog.close)
         self.define_instrument_dialog.setLayout(verticalLayout)
         self.define_instrument_dialog.setWindowTitle("Define parameters for {}".format(object_to_add))
-        self.define_instrument_dialog.resize(200*len(arguments.keys()), 200)
+        self.define_instrument_dialog.resize(500*len(arguments.keys()), 200)
         self.define_instrument_dialog.show()
     
     def save_instrument(self, instrument_class, argument_table):
@@ -176,7 +227,6 @@ class InspectionWindow(QMainWindow):
                 except SyntaxError:
                     error = True
                     raise Exception("Invalid syntax in scan_values argument")
-        # import pdb; pdb.set_trace()
         if arguments['name'] in self.instruments.keys():
             error = True
             raise Exception("Name is already assigned to an instrument")
@@ -205,21 +255,42 @@ class InspectionWindow(QMainWindow):
         inst = self.instruments[name]
         inst_class_name = type(inst).__name__
         if 'Measurement'in inst_class_name:
+            # Generate x and y axis options by taking a sample measurement and using the return
+            import pdb; pdb.set_trace()
+            data = inst.measure()
+            yaxis_combobox = QComboBox()
+            for key, value in data.items():
+                if 'wavelengths'in key or 'energies' in key:
+                    self.RTC_plot_domain = np.array(value)
+                else:
+                    yaxis_combobox.addItems(key)
+            
+            self.measurement_instrument_name = name # it is useful to have this a attribute of the instance... not pretty though
+            import pdb; pdb.set_trace()
             SpecPlot = SpecPlotGUIElement()
             SpecPlot.setData([650,750,850],[1,1,1])
-            exposure = QSpinBox()
-            exposure.setText('Exposure in s')
+            exposure = QDoubleSpinBox()
+            exposure.setValue(1)
             RTC_checkbox = QCheckBox()
             RTC_checkbox.setText('Begin RTC')
+            RTC_checkbox.stateChanged.connect(self.toggle_RTC)
+            exposure_label = QLabel('Exposure [s]')
             layout = QVBoxLayout()
             layout.addWidget(SpecPlot)
-            layout.addWidget(exposure)
-            layout.addWidget(RTC_checkbox)
+            hlayout = QHBoxLayout()
+            hlayout.addWidget(exposure_label)
+            hlayout.addWidget(exposure)
+            hlayout.addwidget(yaxis_combobox)
+            hlayout.addWidget(RTC_checkbox)
+            layout.addLayout(hlayout)
             self.RTC_widgets['{}_SpecPlot'.format(name)] = SpecPlot
+            self.RTC_widgets['{}_exposure_label'.format(name)] = exposure_label
             self.RTC_widgets['{}_exposure'.format(name)] = exposure
+            self.RTC_widgets['{}_yaxis_combobox'.format(name)] = yaxis_combobox
             self.RTC_widgets['{}_RTC_checkbox'.format(name)] = RTC_checkbox
             self.RTC_widgets['{}_layout'.format(name)] = layout
             self.RTC_tab.layout.addLayout(layout)
+            self.create_RTC_worker_thread(inst, yaxis_combobox.text(), exposure.value())
         else:
             units, current_value = inst.get_scan_value()
             layout = QVBoxLayout()

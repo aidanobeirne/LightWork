@@ -11,8 +11,8 @@ class TestMeasurementObject():
         self.wait_time_in_s = 0.1
             
     def measure(self):
-        data = []
-        data.append(random.uniform(0,1))
+        data = {}
+        data['spec'] = random.uniform(0,1)
         time.sleep(self.wait_time_in_s)
         return data
         

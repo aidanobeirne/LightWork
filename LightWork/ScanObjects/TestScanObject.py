@@ -4,6 +4,7 @@ import random
 import sys
 import os
 
+
 class TestScanObject():
     def __init__(self, scan_values, name='Test scan instrument', scan_nest_index=0):
         """
@@ -38,6 +39,6 @@ class TestScanObject():
 
     def get_scan_value(self):
         return 'Test units', random.uniform(0,1)
-	
+
     def close(self):
         pass
