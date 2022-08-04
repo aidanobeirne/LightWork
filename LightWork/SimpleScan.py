@@ -233,7 +233,8 @@ class SimpleScan:
                   ] = self.measurement_instrument.meta_data
         save_data['meta_data'] = meta_data
         saveto = '{}_{}.pkl'.format(self.savefile, unique_ID)
-        pickle.dump(save_data, open(saveto, "wb"))
+        with open(saveto, "wb") as f:
+            pickle.dump(save_data, f)
 
     def final_save(self, data):
         """
@@ -262,7 +263,8 @@ class SimpleScan:
                   ] = self.measurement_instrument.meta_data
         save_data['meta_data'] = meta_data
         saveto = self.savefile + '.pkl'
-        pickle.dump(save_data, open(saveto, "wb"))
+        with open(saveto, "wb") as f:
+            pickle.dump(save_data, f)
 
     def close(self):
         for instrument in self.scan_instruments:
