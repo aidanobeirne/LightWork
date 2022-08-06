@@ -34,7 +34,7 @@ class DaqScanObject():
         self.daq.write(value)
 
     def get_scan_value(self):
-        return 'voltage', self.daq.read()[0]
+        return 'voltage', 'fix this' #self.daq.read()[0]
 	
     def get_save_data(self, value):
         return {'voltage': value}
