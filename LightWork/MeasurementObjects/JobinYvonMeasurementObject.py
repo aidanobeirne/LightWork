@@ -17,7 +17,8 @@ class JobinYvonMeasurementObject():
                           'ystart': ystart,
                           'yend': yend,
                           'slitwidth_mm': slitwidth_mm,
-                          'center_wl': center_wl
+                          'center_wl': center_wl,
+                          'use_synapse': use_synapse
                           }
 
         self.scan_instrument_name = name
@@ -41,12 +42,12 @@ class JobinYvonMeasurementObject():
             shutter_open = bool(shutter_open+bool(UI)+(bool(count)))
 
         print(shutter_open)
-        (ccd, spectrum, queryfn) = acqsetup2(use_synapse, self.camera, self.JY,
+        (ccd, spectrum, queryfn) = acqsetup2(self.meta_data['use_synapse'], self.camera, self.JY,
                                              center_wl, exposure_in_s*1e-3, numavgs, ystart, yend, slitwidth_mm)
         self.wavelengths = spectrum.wavelengths
 
     def measure(self):
-        spec = acquire(1, self.camera, self.JY, self.meta_data['center_wl'], self.meta_data['exposure']*1e3,
+        spec = acquire(self.meta_data['use_synapse'], self.camera, self.JY, self.meta_data['center_wl'], self.meta_data['exposure']*1e3,
                        self.meta_data['numavgs'], self.meta_data['ystart'], self.meta_data['yend'],
                        'Target spectrum', False, self.meta_data['slitwidth_mm']).counts
         data = {'wavelengths': self.wavelengths, 'spec': spec}
