@@ -31,17 +31,8 @@ class JobinYvonMeasurementObject():
         self.JY = initmono()
         mono_setgrating(self.JY, grating)
 
-        shutter_open = bool(1)
-        count = 12
-        while not(shutter_open):
-            ihr_shutter(self.camera, False)
-            ihr_shutter(self.camera, True)
-            # input('Did shutter click open? Enter if not, \'1\' if yes: \n')
-            UI = 0
-            count = count-1
-            shutter_open = bool(shutter_open+bool(UI)+(bool(count)))
+        self.open_shutter()
 
-        print(shutter_open)
         (ccd, spectrum, queryfn) = acqsetup2(self.meta_data['use_synapse'], self.camera, self.JY,
                                              center_wl, exposure_in_s*1e-3, numavgs, ystart, yend, slitwidth_mm)
         self.wavelengths = spectrum.wavelengths
@@ -52,6 +43,16 @@ class JobinYvonMeasurementObject():
                        'Target spectrum', False, self.meta_data['slitwidth_mm']).counts
         data = {'wavelengths': self.wavelengths, 'spec': spec}
         return data
+
+    def open_shutter(self):
+        shutter_open = bool(1)
+        count = 12
+        while not(shutter_open):
+            ihr_shutter(self.camera, False)
+            ihr_shutter(self.camera, True)
+            UI = 0
+            count = count-1
+            shutter_open = bool(shutter_open+bool(UI)+(bool(count)))
 
     def close(self):
         pass
