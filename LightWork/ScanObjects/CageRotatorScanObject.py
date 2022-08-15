@@ -27,7 +27,7 @@ class CageRotatorScanObject(ThorlabsCageRotator):
         super().__init__(SN_motor=SN_motor)
         self.meta_data = {'name':name}
         self.scan_values = list(scan_values)
-        self.scan_nest_index=scan_nest_index
+        self.scan_nest_index = scan_nest_index
         self.scan_instrument_name = name
         
     def set_scan_value(self, value):
