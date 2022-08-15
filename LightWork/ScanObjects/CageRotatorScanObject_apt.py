@@ -2,7 +2,7 @@ import thorlabs_apt as apt
 import time
 
 
-class CageRotatorScanObject():
+class CageRotatorScanObject_apt():
     def __init__(self, scan_values, SN_motor='55164594', name='Cage Rotator', scan_nest_index=0):
         """
     
