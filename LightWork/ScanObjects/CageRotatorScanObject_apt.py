@@ -25,6 +25,7 @@ class CageRotatorScanObject_apt():
         """
         self.motor = apt.Motor(SN_motor)
         self.motor.enable()
+        self.motor.move_home(blocking=True)
         # self.motor.set_velocity_parameters(8,10,10)
         self.meta_data = {'name':name}
         self.scan_values = list(scan_values)
