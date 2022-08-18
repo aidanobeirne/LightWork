@@ -370,8 +370,6 @@ class SingleSpec:
 
 class RTC:
     def __init__(self, measurement_instrument, ref=None, dark=None):
-        ref = np.array(ref)
-        dark = np.array(dark)
         # get domain
         energies = np.array(measurement_instrument.measure()['wavelengths'])
         plt.ion()
@@ -384,11 +382,14 @@ class RTC:
             spec = np.array(measurement_instrument.measure()['spec'])
             # apply background subtraction etc
             if dark is not None and ref is not None:
-                spec = spec - dark
+                ref = np.array(ref)
+                dark = np.array(dark)
                 spec = (spec - ref) / (ref - dark)
             elif dark is not None and ref is None:
+                dark = np.array(dark)
                 spec = spec - dark
             elif dark is None and ref is not None:
+                ref = np.array(ref)
                 spec = (spec - ref) / ref
             line1.set_ydata(spec)
             ax.set_ylim(bottom=min(spec), top=max(spec))
