@@ -2,7 +2,7 @@ import numpy as np
 import os
 from LightWork.ScanObjects.TestScanObject import TestScanObject
 from LightWork.MeasurementObjects.TestMeasurementObject import TestMeasurementObject
-from LightWork.SimpleScan import SimpleScan
+from LightWork.Measurements import SimpleScan
 
 measurer = TestMeasurementObject()
 scanner1 = TestScanObject(

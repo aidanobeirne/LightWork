@@ -1,11 +1,10 @@
-import sys
 import os
 import numpy as np
 import pickle
 from itertools import product
 import time
 import copy
-import pdb
+import matplotlib.pyplot as plt
 from datetime import date
 from twilio.rest import Client
 
@@ -67,7 +66,6 @@ class SimpleScan:
         if laser_shutter:
             from LightWork.ParentClasses.ThorlabsStages.ThorlabsStages import LaserShutter
             self.shutter = LaserShutter(laser_shutter_SN)
-
         self.generate_scan_list()
 
     def generate_scan_list(self):
@@ -98,7 +96,6 @@ class SimpleScan:
                 self.scan_values.extend(merged_list_to_add)
             else:
                 temp_scan_list = []
-#                pdb.set_trace()
                 for v1, v2 in product(self.scan_values, merged_list_to_add):
                     new_sublist = []
                     new_sublist.extend(v1)
@@ -238,7 +235,7 @@ class SimpleScan:
 
     def final_save(self, data):
         """
-        Used to save the dictionary that contains all of the data at the end of the run_sweep() method
+        Used to save the dictionary that contains all of the data at the end of the run_scan() method
 
         Parameters
         ----------
@@ -271,3 +268,129 @@ class SimpleScan:
             instrument.close()
 
         self.measurement_instrument.close()
+
+
+class SingleSpec:
+    def __init__(self, measurement_instrument, scan_instruments=None, ref=None, dark=None, laser_shutter=False, laser_shutter_SN='37005097',
+                 savepath=os.getcwd(), savename='data', scan_notes=''):
+        """ Class used to acquire a single spectrum
+
+        Args:
+            measurement_instrument : MeasurementObject 
+            scan_instruments : List of ScanObjects
+            ref (array, optional): reference spectrum. Defaults to None.
+            dark (array, optional): dark spectrum. Defaults to None.
+            laser_shutter (bool, optional): whether or not to use thorlabs laser shutter. Defaults to False.
+            laser_shutter_SN (str, optional): laser shutter serial number. Defaults to '37005097'.
+            savepath (str, optional): directory to save. Defaults to os.getcwd().
+            savename (str, optional): filename. Defaults to 'data'.
+            scan_notes (str, optional): any notes that you have. Defaults to ''.
+        """
+        self.measurement_instrument = measurement_instrument
+        self.scan_instruments = scan_instruments
+        self.meta_data = {'scan notes': scan_notes}
+        self.scan_instrument_names = [
+            inst.scan_instrument_name for inst in self.scan_instruments]
+        self.savefile = os.path.join(savepath, savename)
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
+        if laser_shutter:
+            from LightWork.ParentClasses.ThorlabsStages.ThorlabsStages import LaserShutter
+            self.shutter = LaserShutter(laser_shutter_SN)
+        self.acquire(ref=ref, dark=dark)
+        self.final_save(self.master_data)
+
+    def acquire(self, ref=None, dark=None):
+        """ Used to save a single spectrum 
+
+        Args:
+            ref (array or list, optional): reference spectrum in case this is a reflection contrast measurement. Defaults to None.
+            dark (array or list, optional): dark spectrum that can be subtracted. Defaults to None.
+        """
+        self.master_data = {}
+        try:
+            for inst in self.scan_instruments:
+                try:
+                    self.master_data['{}'.format(
+                        inst.scan_instrument_name)] = inst.get_save_data(inst.get_scan_value())
+                except TypeError:
+                    pass
+        except TypeError:
+            pass
+        # acquire data
+            data = self.measurement_instrument.measure()
+        # apply background subtraction etc
+            if dark is not None and ref is not None:
+                data['spec dark subtracted'] = data['spec'] - np.array(dark)
+                data['reflection contrast'] = (
+                    data['spec dark subtracted'] - np.array(ref)) / np.array(ref)
+            elif dark is not None and ref is None:
+                data['spec dark subtracted'] = data['spec'] - np.array(dark)
+            elif dark is None and ref is not None:
+                data['reflection contrast'] = (
+                    data['spec'] - np.array(ref)) / np.array(ref)
+        # Add to the master_data dictionary
+        self.master_data['data'] = data
+
+    def final_save(self, data):
+        """
+        Used to save the dictionary that contains all of the data at the end of the acquire() method
+
+        Parameters
+        ----------
+        data : DICTIONARY
+            The master_data dictionary that is constructed in the run_scan() method.
+
+        Returns
+        -------
+        None.
+
+        """
+        save_data = {}
+        save_data['master_data'] = data
+        meta_data = copy.deepcopy(self.meta_data)
+
+        try:
+            for inst in self.scan_instruments:
+                try:
+                    meta_data['{}'.format(
+                        inst.scan_instrument_name)] = inst.meta_data
+                except TypeError:
+                    pass
+        except TypeError:
+            pass
+
+        meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)
+                  ] = self.measurement_instrument.meta_data
+        save_data['meta_data'] = meta_data
+        saveto = self.savefile + '.pkl'
+        with open(saveto, "wb") as f:
+            pickle.dump(save_data, f)
+
+
+class RTC:
+    def __init__(self, measurement_instrument, ref=None, dark=None):
+        ref = np.array(ref)
+        dark = np.array(dark)
+        # get domain
+        energies = np.array(measurement_instrument.measure()['wavelengths'])
+        plt.ion()
+        fig = plt.figure(figsize=(20, 10))
+        ax = fig.add_subplot(111)
+        line1, = ax.plot(energies, np.ones_like(energies))
+
+        capture = True
+        while capture:
+            spec = np.array(measurement_instrument.measure()['spec'])
+            # apply background subtraction etc
+            if dark is not None and ref is not None:
+                spec = spec - dark
+                spec = (spec - ref) / (ref - dark)
+            elif dark is not None and ref is None:
+                spec = spec - dark
+            elif dark is None and ref is not None:
+                spec = (spec - ref) / ref
+            line1.set_ydata(spec)
+            ax.set_ylim(bottom=min(spec), top=max(spec))
+            fig.canvas.flush_events()
+            time.sleep(0.02)

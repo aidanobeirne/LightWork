@@ -2,11 +2,11 @@ import numpy as np
 import os
 from LightWork.ScanObjects.SolsTiSScanObject import SolsTiSScanObject
 from LightWork.MeasurementObjects.SR830MeasurementObject import SR830MeasurementObject
-from LightWork.SimpleScan import SimpleScan
+from LightWork.Measurements import SimpleScan
 
 # Time Constant settings are coded as follows:
 # 0 : 10e-6,  1 : 30e-6,   2 : 100e-6,  3 : 300e-6,  4 : 1e-3,  5 : 3e-3,
-# 6 : 10e-3,  7 : 30e-3,   8 : 100e-3,  9 : 300e-3, 10: 1,       11: 3, 
+# 6 : 10e-3,  7 : 30e-3,   8 : 100e-3,  9 : 300e-3, 10: 1,       11: 3,
 # 12: 10,    13: 30,    14: 100,    15: 300,  16: 1000,   17: 3000,
 #  18: 10000,    19: 30000
 #  Sensitivity settings are coded as follows:
@@ -18,15 +18,18 @@ from LightWork.SimpleScan import SimpleScan
 #  25: '500 mV/nA',   26: '1V/uA'
 #
 
-LockIn = SR830MeasurementObject(port='GPIB0::11::INSTR', TC=9, sens=21, TCs_to_wait=9.23, navg=50)
-solstis = SolsTiSScanObject(address='192.168.1.222', port=39900, scan_values=np.arange(750,870,1), scan_nest_index=0)
+LockIn = SR830MeasurementObject(
+    port='GPIB0::11::INSTR', TC=9, sens=21, TCs_to_wait=9.23, navg=50)
+solstis = SolsTiSScanObject(address='192.168.1.222', port=39900,
+                            scan_values=np.arange(750, 870, 1), scan_nest_index=0)
 
 # First run reference scan
 Reference = SimpleScan(
-   measurement_instrument=LockIn, scan_instruments=[solstis], laser_shutter=False,
-   savepath=os.path.join(os.getcwd(),'test'),
-   savename='Reference', scan_notes='', save_npz=0, save_at_every_step=False
-   )
+    measurement_instrument=LockIn, scan_instruments=[
+        solstis], laser_shutter=False,
+    savepath=os.path.join(os.getcwd(), 'test'),
+    savename='Reference', scan_notes='', save_npz=0, save_at_every_step=False
+)
 
 input('Set offset bias and start chopper to measure reference spectrum. Press Enter')
 Reference.run_sweep()
@@ -36,31 +39,11 @@ LockIn.setTC(13)
 LockIn.setsens(8)
 LockIn.update_meta_data()
 Sample = SimpleScan(
-   measurement_instrument=LockIn, scan_instruments=[solstis], laser_shutter=False,
-   savepath=os.path.join(os.getcwd(),'test'),
-   savename='Sample', scan_notes='', save_npz=0, save_at_every_step=False
-   )
+    measurement_instrument=LockIn, scan_instruments=[
+        solstis], laser_shutter=False,
+    savepath=os.path.join(os.getcwd(), 'test'),
+    savename='Sample', scan_notes='', save_npz=0, save_at_every_step=False
+)
 
 input('Turn off and remove chopper. Set the AC bias. Press Enter')
 Sample.run_scan()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
