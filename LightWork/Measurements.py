@@ -289,8 +289,9 @@ class SingleSpec:
         self.measurement_instrument = measurement_instrument
         self.scan_instruments = scan_instruments
         self.meta_data = {'scan notes': scan_notes}
-        self.scan_instrument_names = [
-            inst.scan_instrument_name for inst in self.scan_instruments]
+        if scan_instruments is not None:
+            self.scan_instrument_names = [
+                inst.scan_instrument_name for inst in self.scan_instruments]
         self.savefile = os.path.join(savepath, savename)
         if not os.path.exists(savepath):
             os.makedirs(savepath)
@@ -323,7 +324,7 @@ class SingleSpec:
             if dark is not None and ref is not None:
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
                 data['reflection contrast'] = (
-                    data['spec dark subtracted'] - np.array(ref)) / np.array(ref)
+                    data['spec dark subtracted'] - np.array(ref)) / (np.array(ref) - np.array(dark))
             elif dark is not None and ref is None:
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
             elif dark is None and ref is not None:
