@@ -393,5 +393,6 @@ class RTC:
                 spec = (spec - ref) / ref
             line1.set_ydata(spec)
             ax.set_ylim(bottom=min(spec), top=max(spec))
+            fig.canvas.draw()
             fig.canvas.flush_events()
             time.sleep(0.02)
