@@ -236,7 +236,7 @@ class SimpleScan:
         with open(saveto, "wb") as f:
             pickle.dump(save_data, f)
 
-    def final_save(self, data, alternate_savename=None):
+    def final_save(self, data):
         """
         Used to save the dictionary that contains all of the data at the end of the run_sweep() method
 
@@ -244,15 +244,12 @@ class SimpleScan:
         ----------
         data : DICTIONARY
             The master_data dictionary that is constructed in the run_scan() method.
-        alternate_savename : STRING, optional 
-            an updated savename in the event that one does not want to use the self.savefile instance attribute.
 
         Returns
         -------
         None.
 
         """
-
         save_data = {}
         save_data['master_data'] = data
         meta_data = copy.deepcopy(self.meta_data)
@@ -265,47 +262,9 @@ class SimpleScan:
         meta_data['{}'.format(self.measurement_instrument.scan_instrument_name)
                   ] = self.measurement_instrument.meta_data
         save_data['meta_data'] = meta_data
-
-        if alternate_savename is not None:
-            dir = os.path.dirname(self.savefile)
-            saveto = os.path.join(dir, alternate_savename)
-        else:
-            saveto = self.savefile + '.pkl'
+        saveto = self.savefile + '.pkl'
         with open(saveto, "wb") as f:
             pickle.dump(save_data, f)
-
-    def single_spec(self, savename, ref=None, dark=None):
-        """ Used to save a single spectrum - no scan objects are changed
-
-        Args:
-            savename (string): filename 
-            ref (array or list, optional): reference spectrum in case this is a reflection contrast measurement. Defaults to None.
-            dark (array or list, optional): dark spectrum that can be subtracted. Defaults to None.
-        """
-        self.master_data = {}
-        for inst in self.scan_instruments:
-            try:
-                self.master_data['{}'.format(
-                    inst.scan_instrument_name)] = inst.get_save_data(inst.get_scan_value())
-            except TypeError:
-                pass
-        # acquire data
-            data = self.measurement_instrument.measure()
-        # apply background subtraction etc
-            if dark is not None and ref is not None:
-                data['spec dark subtracted'] = data['spec'] - np.array(dark)
-                data['reflection contrast'] = (
-                    data['spec dark subtracted'] - np.array(ref)) / np.array(ref)
-            elif dark is not None and ref is None:
-                data['spec dark subtracted'] = data['spec'] - np.array(dark)
-            elif dark is None and ref is not None:
-                data['reflection contrast'] = (
-                    data['spec'] - np.array(ref)) / np.array(ref)
-        # Add to the master_data dictionary
-        self.master_data['data'] = data
-
-        # save the data
-        self.final_save(self.master_data, alternate_savename=savename)
 
     def close(self):
         for instrument in self.scan_instruments:
