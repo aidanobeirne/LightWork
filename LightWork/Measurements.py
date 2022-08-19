@@ -322,6 +322,7 @@ class SingleSpec:
             data = self.measurement_instrument.measure()
         # apply background subtraction etc
             if dark is not None and ref is not None:
+                data['ref'] = ref
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
                 data['reflection contrast'] = (
                     data['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
