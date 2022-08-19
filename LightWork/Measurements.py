@@ -10,7 +10,7 @@ from twilio.rest import Client
 
 
 class SimpleScan:
-    def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
+    def __init__(self, measurement_instrument, scan_instruments, dark=None, ref=None, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
                  savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
                  notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
@@ -20,6 +20,10 @@ class SimpleScan:
             THE INSTRUMENT YOU WISH TO ACQUIRE DATA WITH -- USUALLY A CAMERA IN A SPECTROMETER.
         scan_instruments : List of ScanObjects
             A LIST OF INSTRUMENTS WHOSE ATTRIBUTES YOU WISH TO SCAN ACROSS, E.G. KEITHLEY2400.
+        dark : array, optional
+            dark spectrum
+        ref : array, optional
+            reference spectrum
         save_at_every_step : BOOL, optional
             DO YOU WANT TO SAVE A SINGLE MEASUREMENT AT EVERY SCAN STEP? (USEFUL WHEN SCAN INSTRUMENTS ARE UNRELIABLE OR IF YOU ARE DEBUGGING). The default is True.
         laser_shutter : BOOL, optional
@@ -87,8 +91,7 @@ class SimpleScan:
                 instrument.scan_values for instrument in instruments_with_same_idx]
             if not all(len(l) == len(scan_arrays_to_be_zipped[0]) for l in scan_arrays_to_be_zipped):
                 #                self.close()
-                raise ValueError('not all lists in scan nest index = {} have same length, you silly goose!'.format(
-                    idx + min(scan_nest_indices)))
+                raise ValueError('not all lists in scan nest index = {} have same length, you silly goose!'.format(idx + min(scan_nest_indices)))
             # list(zip(*scan_arrays_to_be_zipped))
             merged_list_to_add = list(
                 map(list, zip(*scan_arrays_to_be_zipped)))
@@ -144,7 +147,15 @@ class SimpleScan:
 
             # acquire data
             data = self.measurement_instrument.measure()
-
+            if self.dark is not None and self.ref is not None:
+                data['ref'] = self.ref
+                data['dark'] = self.dark
+                data['spec dark subtracted'] = data['spec'] - self.dark
+                data['reflection contrast'] = (data['spec'] - self.ref) / (self.ref - self.dark)
+            elif self.dark is not None and self.ref is None:
+                data['spec dark subtracted'] = data['spec'] - self.dark
+            elif self.dark is None and self.ref is not None:
+                data['reflection contrast'] = (data['spec'] - self.ref) / self.ref
             # Save the data at every step if desired
             if self.save_at_every_step:
                 self.save_data_npz(values, data, unique_ID) if self.save_npz else self.save_data_pkl(
@@ -371,9 +382,11 @@ class SingleSpec:
 
 
 class RTC:
-    def __init__(self, measurement_instrument, ref=None, dark=None):
+    def __init__(self, measurement_instrument, ref=None, dark=None, change_x_axis=False):
         # get domain
         energies = np.array(measurement_instrument.measure()['wavelengths'])
+        if change_x_axis:
+            energies = 1240/energies
         plt.ion()
         fig = plt.figure(figsize=(20, 10))
         ax = fig.add_subplot(111)
