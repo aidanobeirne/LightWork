@@ -57,6 +57,10 @@ class SimpleScan:
         self.meta_data = {'scan notes': scan_notes}
         self.save_npz = save_npz
         self.scan_instruments = scan_instruments
+        if dark is not None:
+            self.dark = np.array(dark)
+        if ref is not None:
+            self.ref = np.array(ref)
         self.scan_instrument_names = [
             inst.scan_instrument_name for inst in self.scan_instruments]
         self.savefile = os.path.join(savepath, savename)
