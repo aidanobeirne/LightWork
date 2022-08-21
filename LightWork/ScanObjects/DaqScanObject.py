@@ -2,7 +2,6 @@ import sys
 import os
 import nidaqmx as daq
 
-
 class DaqScanObject():
     def __init__(self, scan_values, chan='Dev1/ao0', name='x daq', scan_nest_index=0):
         """
@@ -37,7 +36,7 @@ class DaqScanObject():
         return 'voltage', 'fix this' #self.daq.read()[0]
 	
     def get_save_data(self, value):
-        return {'voltage': value}
+        return {'voltage [V]': value}
 	
     def close(self):
         pass

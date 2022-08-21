@@ -52,7 +52,7 @@ class KeithleyScanObject(Keithley2400):
             currents.append(self.current[1])
             time.sleep(0.01)
         data = {'voltage [V]': value,
-                'leakage current [nA]': 1e9*np.mean(currents)}
+                'current [nA]': 1e9*np.mean(currents)}
         print('{}, {} V, {} nA leakage current'.format(
             self.scan_instrument_name, value, np.round(1e9*np.mean(currents), 4)))
         return data

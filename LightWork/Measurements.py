@@ -370,9 +370,11 @@ class SingleSpec:
 
 
 class RTC:
-    def __init__(self, measurement_instrument, ref=None, dark=None):
+    def __init__(self, measurement_instrument, ref=None, dark=None, swap_domain_units=False):
         # get domain
         energies = np.array(measurement_instrument.measure()['wavelengths'])
+        if swap_domain_units:
+            energies = 1240/energies
         plt.ion()
         fig = plt.figure(figsize=(20, 10))
         ax = fig.add_subplot(111)
