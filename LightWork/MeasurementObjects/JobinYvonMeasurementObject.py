@@ -16,7 +16,9 @@ class JobinYvonMeasurementObject():
         Args:
             name (str, optional): custom name for measurement object. Defaults to 'Jobin Yvon'.
             exposure_in_s (int, optional): exposure in seconds. Defaults to 1.
-            grating (int, optional): 0 is 1200 g/mm 500nm blaze, 1 is 150 g/mm with 500nm blaze, 150 g/mm with 1200nm blaze. Defaults to 1.
+            grating (int, optional): 0 is 1200 g/mm 500nm blaze, 
+                                     1 is 150 g/mm with 500nm blaze, 
+                                     2 is 150 g/mm with 1200nm blaze. Defaults to 1.
             use_synapse (int, optional): whether to use the synapse or InGaAs. Defaults to 1.
             numavgs (int, optional): number of acquisitions to take and average over. Defaults to 1.
             center_wl (int, optional): center wavelength of spectrum. Defaults to 700.
