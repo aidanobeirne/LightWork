@@ -1,5 +1,6 @@
 global-exclude *.py[co]
 graft LightWork\ParentClasses\Andor
 graft LightWork\ParentClasses\ThorlabsStages
-graft LightWork\LightWork\Examples\AnalysisExamples\SimpleScan_example_data
-graft LightWork\LightWork\Examples\AnalysisExamples\Deeplotter_example_data
+graft LightWork\Examples
+graft LightWork\Examples\AnalysisExamples\SimpleScan_example_data
+graft LightWork\Examples\AnalysisExamples\Deeplotter_example_data

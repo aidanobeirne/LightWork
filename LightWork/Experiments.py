@@ -371,6 +371,14 @@ class SingleSpec:
 
 class RTC:
     def __init__(self, measurement_instrument, ref=None, dark=None, swap_domain_units=False):
+        """ Real time capture experiment
+
+        Args:
+            measurement_instrument (MeasurementObject): camera/spectrometer
+            ref (array, optional): reference spectrum. Defaults to None.
+            dark (array, optional): dark spectrum. Defaults to None.
+            swap_domain_units (bool, optional): Whether to change to wavelengths or energies. Defaults to False.
+        """
         # get domain
         energies = np.array(measurement_instrument.measure()['wavelengths'])
         if swap_domain_units:
