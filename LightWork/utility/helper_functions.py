@@ -105,11 +105,11 @@ def get_from_dict(dataDict, mapList):
 def set_in_dict(dataDict, mapList, value):
     get_from_dict(dataDict, mapList[:-1])[mapList[-1]] = value
 
-def generate_deeplotter_input(measurement, x_key_list, y_key_list, swap_domain_units=False):
+def generate_deeplotter_input(experiment, x_key_list, y_key_list, swap_domain_units=False):
     """ Constructs 3D data array that is used as an input to the deeplotter package
 
     Args:
-        measurement (Dict): dictionary from imported LightWork save file
+        experiment (Dict): dictionary from imported LightWork save file
         x_key_list (list): list of strings to navigate to sorter key, e.g. ['keithley_BG, 'voltage [V]']
         y_key_list (list): same as x_key_list but for y value
         swap_domain_units (bool, optional): whether or not to swap the domain from enegy to wavelengths or vice versa. Defaults to False.
@@ -118,17 +118,17 @@ def generate_deeplotter_input(measurement, x_key_list, y_key_list, swap_domain_u
         dict: dictionary containing the arguments that go to the deeplotter instance. Just unpack the dictionary to use the output.
     """
     # construct domain
-    energies = np.array(measurement['master_data'][0]['data']['wavelengths'])
+    energies = np.array(experiment['master_data'][0]['data']['wavelengths'])
     if swap_domain_units:
         energies = 1240/energies
     # construct grid of scan values
-    xvalues = sorted(set([get_from_dict(scan, x_key_list) for scan in measurement['master_data'].values()]))
-    yvalues = sorted(set([get_from_dict(scan, y_key_list) for scan in measurement['master_data'].values()]))
+    xvalues = sorted(set([get_from_dict(scan, x_key_list) for scan in experiment['master_data'].values()]))
+    yvalues = sorted(set([get_from_dict(scan, y_key_list) for scan in experiment['master_data'].values()]))
     xcoord, ycoord = np.meshgrid(xvalues, yvalues)
     # reconstruct coordinate array and array of corresponding scan IDs
     idx_grid = np.ones_like(xcoord)
     for x, y in list(product(xvalues, yvalues)):
-        for idx, scan in measurement['master_data'].items():
+        for idx, scan in experiment['master_data'].items():
             if get_from_dict(scan, x_key_list) == x and get_from_dict(scan, y_key_list) == y:
                 scan_index = idx  
         j = np.argwhere(xcoord == x)[0][1]
@@ -137,23 +137,23 @@ def generate_deeplotter_input(measurement, x_key_list, y_key_list, swap_domain_u
     # construct 3D data array
     data_threeD = np.zeros((len(yvalues), len(xvalues), len(energies)))
     for x, y in list(product(xvalues, yvalues)):
-        for idx, scan in measurement['master_data'].items():
+        for idx, scan in experiment['master_data'].items():
             if get_from_dict(scan, x_key_list) == x and get_from_dict(scan, y_key_list) == y: 
                 j = np.argwhere(xcoord == x)[0][1]
                 i = np.argwhere(ycoord == y)[0][0]
                 try:
-                    data_threeD[i,j] = measurement['master_data'][idx]['data']['reflection contrast']
+                    data_threeD[i,j] = experiment['master_data'][idx]['data']['reflection contrast']
                 except KeyError:
                     try:
-                        data_threeD[i,j] = measurement['master_data'][idx]['data']['spec dark subtracted']
+                        data_threeD[i,j] = experiment['master_data'][idx]['data']['spec dark subtracted']
                     except KeyError:
-                        data_threeD[i,j] = measurement['master_data'][idx]['data']['spec']       
+                        data_threeD[i,j] = experiment['master_data'][idx]['data']['spec']       
     xvalues = np.array(xvalues)
     yvalues = np.array(yvalues)
     args = {'x': xvalues, 'y': yvalues, 'z': energies, 'data': data_threeD}
     return args
 
-def add_ref_or_dark_to_measurement(path_to_pkl, ref=None, dark=None):
+def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
     """ Adds a reference or dark to a Lightwork savefile and resaves the dataset
     Args:
         path_to_pkl (str): path to LightWork savefile
@@ -162,9 +162,9 @@ def add_ref_or_dark_to_measurement(path_to_pkl, ref=None, dark=None):
     """
     # load pickle file
     with open(r"{}".format(path_to_pkl), 'rb') as handle:
-        measurement = pickle.load(handle)
+        experiment = pickle.load(handle)
     # add spectra to dataset
-    for scan in measurement['master_data'].values():
+    for scan in experiment['master_data'].values():
         if dark is not None and ref is not None:
             scan['data']['spec dark subtracted'] = scan['data']['spec'] - np.array(dark)
             scan['data']['reflection contrast'] = (scan['data']['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
@@ -175,14 +175,14 @@ def add_ref_or_dark_to_measurement(path_to_pkl, ref=None, dark=None):
                 scan['data']['spec'] - np.array(ref)) / np.array(ref)
                 # save file
     with open(path_to_pkl, "wb") as f:
-            pickle.dump(measurement, f)
+            pickle.dump(experiment, f)
 
 
-def plot_sorter_linecut(measuremnt, map_to_sorter, sorter_cuts_to_plot=[], title='', legend_var='', cmap='Greys', cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None):
+def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title='', legend_var='', cmap='Greys', cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None):
     """ Plots a 2D map of a Lightwork scan in addition to selected linecuts
 
     Args:
-        measuremnt (dict): Lightwork dictionary
+        experiment (dict): Lightwork dictionary
         map_to_sorter (list): list of strings to navigate to sorter key, e.g. ['keithley_BG, 'voltage [V]']
         sorter_cuts_to_plot (list, optional): sorter values to plot linecuts of (e.g. 3.5 if you want to plot the 3.5 volt spectrum). Defaults to [].
         title (str, optional): title of plot. Defaults to ''.
@@ -195,10 +195,10 @@ def plot_sorter_linecut(measuremnt, map_to_sorter, sorter_cuts_to_plot=[], title
         z_min (float, optional): zmin of contourplot. Defaults to None.
         z_max (float, optional): zmax of contourplot. Defaults to None.
     """
-    energies = 1240/np.array(measuremnt['master_data'][0]['data']['wavelengths'])
+    energies = 1240/np.array(experiment['master_data'][0]['data']['wavelengths'])
     spectra = []
     sorter = []
-    for scan in measuremnt['master_data'].values():
+    for scan in experiment['master_data'].values():
         try:
            spectra.append(scan['data']['reflection contrast'])
         except KeyError:

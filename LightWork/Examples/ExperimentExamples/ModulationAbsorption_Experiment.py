@@ -2,7 +2,7 @@ import numpy as np
 import os
 from LightWork.ScanObjects.SolsTiSScanObject import SolsTiSScanObject
 from LightWork.MeasurementObjects.SR830MeasurementObject import SR830MeasurementObject
-from LightWork.Measurements import SimpleScan
+from LightWork.Experiments import SimpleScan
 
 # Time Constant settings are coded as follows:
 # 0 : 10e-6,  1 : 30e-6,   2 : 100e-6,  3 : 300e-6,  4 : 1e-3,  5 : 3e-3,

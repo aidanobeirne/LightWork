@@ -2,7 +2,7 @@ import numpy as np
 import datetime
 from LightWork.MeasurementObjects.JobinYvonMeasurementObject import JobinYvonMeasurementObject
 from LightWork.ScanObjects.KeithleyScanObject import KeithleyScanObject
-from LightWork.Measurements import SimpleScan
+from LightWork.Experiments import SimpleScan
 
 cam = JobinYvonMeasurementObject(exposure_in_s=1, grating=1, use_synapse=1,
                                  numavgs=1, center_wl=700, ystart=125, yend=165, slitwidth_mm=1.0)

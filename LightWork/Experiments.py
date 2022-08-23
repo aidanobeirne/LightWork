@@ -308,7 +308,7 @@ class SingleSpec:
             ref (array or list, optional): reference spectrum in case this is a reflection contrast measurement. Defaults to None.
             dark (array or list, optional): dark spectrum that can be subtracted. Defaults to None.
         """
-        self.master_data = {}
+        self.master_data = {0: {}}
         try:
             for inst in self.scan_instruments:
                 try:
@@ -331,7 +331,7 @@ class SingleSpec:
                 data['reflection contrast'] = (
                     data['spec'] - np.array(ref)) / np.array(ref)
         # Add to the master_data dictionary
-        self.master_data['data'] = data
+        self.master_data[0]['data'] = data
 
     def final_save(self, data):
         """
