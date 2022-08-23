@@ -343,10 +343,12 @@ class SingleSpec:
         # apply background subtraction etc
             if dark is not None and ref is not None:
                 data['ref'] = ref
+                data['dark'] = dark
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
                 data['reflection contrast'] = (
                     data['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
             elif dark is not None and ref is None:
+                data['dark'] = dark
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
             elif dark is None and ref is not None:
                 data['ref'] = ref

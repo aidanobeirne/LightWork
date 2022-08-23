@@ -176,14 +176,18 @@ def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
     # add spectra to dataset
     for scan in experiment['master_data'].values():
         if dark is not None and ref is not None:
+            scan['data']['ref'] = ref
+            scan['data']['dark'] = dark
             scan['data']['spec dark subtracted'] = scan['data']['spec'] - \
                 np.array(dark)
             scan['data']['reflection contrast'] = (
                 scan['data']['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
         elif dark is not None and ref is None:
+            scan['data']['dark'] = dark
             scan['data']['spec dark subtracted'] = scan['data']['spec'] - \
                 np.array(dark)
         elif dark is None and ref is not None:
+            scan['data']['ref'] = ref
             scan['data']['reflection contrast'] = (
                 scan['data']['spec'] - np.array(ref)) / np.array(ref)
             # save file
