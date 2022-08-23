@@ -15,6 +15,7 @@ except Exception:
 
 class ShallowPlotter():
     """ Tool to plot 2D LightWork data (i.e. only one variable is scanned)
+
     """
 
     def __init__(self, *args, **kw):
