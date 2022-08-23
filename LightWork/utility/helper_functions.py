@@ -239,41 +239,5 @@ def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title
     plt.show()
 
 
-# def plot_energy_linecut(master_data, map_to_sorter, title='', energy_cuts_to_plot=[], halfwidth=3, cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None):
-#     energies = 1240/np.array(master_data[0]['data']['wavelengths'])
-#     spectra = []
-#     sorter = []
-#     for step, scan_dict in master_data.items():
-#         spectra.append(scan_dict['data']['spec'])
-#         sorter.append(getFromDict(scan_dict, map_to_sorter))
-#     spectra = np.array(spectra)
-#     sorter = np.array(sorter)
-#     if cr_thresholds:
-#         spectra = RemoveCosmicRaysRecursive(spectra, cr_m, cr_thresholds)
-#     if sc_e_min is not None:
-#         shift_correction_range(spectra, energies, sc_e_min, sc_e_max)
-#     if energy_cuts_to_plot:
-#         true_energies = [energies[(abs(energies-val)).argmin()]
-#                          for val in energy_cuts_to_plot]
-
-#     fig, axs = plt.subplots(2, 1)
-#     for count, d in enumerate(true_energies):
-#         idx = list(energies).index(d)
-#         axs[1].plot(sorter, np.mean(spectra[:, idx-halfwidth:idx+halfwidth],
-#                     axis=1), label='{} eV'.format(np.round(d, 2)), marker='.')
-#         axs[0].axvspan(energies[idx-halfwidth], energies[idx +
-#                        halfwidth], alpha=0.5, color='C{}'.format(count))
-#     plt.xlabel('Energy [eV]')
-#     axs[1].set_ylabel('Intensity [a.u.]')
-#     axs[1].legend(prop={'size': 10})
-#     zmin = z_min if z_min is not None else np.min(spectra)
-#     zmax = z_max if z_max is not None else np.max(spectra)
-#     contourplot = axs[0].contourf(
-#         energies, sorter, spectra, levels=np.linspace(zmin, zmax, 500), cmap='Greys')
-#     axs[0].set_ylabel('charge density [cm$^{{-2}}$]')
-#     axs[0].set_autoscalex_on(False)
-#     plt.colorbar(contourplot, ax=axs[0], pad=0.02)
-#     fig.suptitle(title, fontsize=35)
-#     plt.show()
 
 

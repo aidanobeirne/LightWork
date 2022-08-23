@@ -50,8 +50,8 @@ class ShallowPlotter():
         self.axs[1].set_ylabel(self.opt['ilabel'])
         self.axs[1].set_xlim((min(self.x), max(self.x)))
         self.axs[1].legend(prop={'size': 10})
-        vmin, vmax = self.opt['vmin'] if self.opt['vmax'] is not None else (
-            np.min(self.data), np.max(self.data))
+        vmin = self.opt['vmin'] if self.opt['vmin'] is not None else np.min(self.data)
+        vmax = self.opt['vmax'] if self.opt['vmax'] is not None else np.max(self.data)
         self.data = self.data.reshape(self.xx.shape)
         self.colormeshplot = self.axs[0].pcolormesh(
             self.xx, self.yy, self.data, vmin=vmin, vmax=vmax, cmap=self.opt['cmap'], shading='auto')
@@ -104,9 +104,9 @@ class ShallowPlotter():
             self.data = np.array(self.data)
             self.y = np.array(self.y)
             self.x = np.array(scan['data']['wavelengths'])
-            self.xx, self.yy = np.meshgrid(self.x, self.y)
             if self.opt['change_x_units']:
                 self.x = 1240/self.x
+            self.xx, self.yy = np.meshgrid(self.x, self.y)
         else:
             raise ValueError('Incorrect data type format')
 
