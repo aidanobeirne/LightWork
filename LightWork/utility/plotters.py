@@ -14,6 +14,8 @@ except Exception:
 
 class ShallowPlotter():
     """ Tool to plot 2D LightWork data (i.e. only one variable is scanned)
+    TODO:
+    rescale ylim on axs[1] whenever a spectrum is deleted
     """
 
     def __init__(self, *args, **kw):
@@ -44,6 +46,7 @@ class ShallowPlotter():
         self._process_kw(*args, **kw)
 
         # Axes and Figures
+        plt.ion()
         self.fig, self.axs = plt.subplots(2, 1)
         plt.xlabel(self.opt['xlabel'])
         self.axs[0].set_ylabel(self.opt['ylabel'])
