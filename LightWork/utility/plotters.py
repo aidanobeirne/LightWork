@@ -4,21 +4,17 @@ import numpy as np
 import LightWork.utility.helper_functions as h
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import warnings
 import traceback
-import sys
+
 
 try:
     from PyQt5 import QtWidgets
 except Exception:
     traceback.print_exc()
 
-# ==========================================================================
-# 2D (nonhyperspectral) plotting class
-# ==========================================================================
-
-
 class ShallowPlotter():
+    """ Tool to plot 2D LightWork data (i.e. only one variable is scanned)
+    """
 
     def __init__(self, *args, **kw):
         '''
@@ -121,24 +117,23 @@ class ShallowPlotter():
             self.lines[yvalue] = self.axs[0].axhline(
                 yvalue, alpha=0.35, color='C{}'.format(self.color_counter))
             self.specs[yvalue] = self.axs[1].plot(
-                self.x, self.data[yidx, :], label='{}={}'.format(self.opt['legend_label'], np.round(yvalue, 2)), color='C{}'.format(self.color_counter))
+                self.x, self.data[yidx, :] + self.color_counter * self.opt['spec_staggering'], label='{}={}'.format(self.opt['legend_label'], np.round(yvalue, 2)), color='C{}'.format(self.color_counter))
             self.axs[1].legend(prop={'size': 10})
             self.color_counter += 1
 
         elif self.u_is_held:
             yidx = (abs(self.y - event.ydata)).argmin()
             yvalue = self.y[yidx]
-            current_legend_items = []
-            for key in self.lines.keys():
-                current_legend_items.append(key)
-            key_to_remove = current_legend_items[(
-                np.array(current_legend_items) - yvalue).argmin()]
+            current_legend_values = np.array([float(key) for key in self.lines.keys()])
+            current_legend_keys = list(self.lines.keys())
+            key_to_remove = current_legend_keys[abs(current_legend_values - yvalue).argmin()]
 
-            l = self.lines.pop(key_to_remove)
-            l.remove()
-            del l
-            s = self.specs.pop(key_to_remove)
+            # delete spec and line
+            s = self.specs[key_to_remove].pop(0)
             s.remove()
+            del s
+            self.lines[key_to_remove].remove()
+            l = self.lines.pop(key_to_remove)
             del l
 
             self.axs[1].legend(prop={'size': 10})
