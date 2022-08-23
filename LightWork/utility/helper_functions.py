@@ -10,6 +10,7 @@ import pprint
 
 # Helper functions
 
+
 def modified_z_score(intensity):
     """calculates the mean absolute deviation and returns the modified z score
 
@@ -25,6 +26,7 @@ def modified_z_score(intensity):
     # 0.75th quartile of normal distribution
     modified_z_scores = 0.6745 * (intensity - median_int) / mad_int
     return abs(np.array(modified_z_scores))
+
 
 def RemoveCosmicRays(spec, m, threshold):
     """Removes cosmic rays from a dataset
@@ -53,6 +55,7 @@ def RemoveCosmicRays(spec, m, threshold):
         spec_out[idx] = np.mean(spec[w2])  # and we average their values
     return spec_out
 
+
 def RemoveCosmicRaysRecursive(spec, m, thresholds):
     """recursively runs the RemoveCosmicRays function. This is often more effective than running the ray removal one time.
 
@@ -78,6 +81,7 @@ def RemoveCosmicRaysRecursive(spec, m, thresholds):
             spec_out = RemoveCosmicRays(spec_out, m, threshold)
         return spec_out
 
+
 def shift_correction_range(spectra, energies, e_min, e_max, shift_value):
     """ Shifts a dataset such that the average of each spectrum over a desired energy range is equal to the shift_value
     Args:
@@ -88,7 +92,7 @@ def shift_correction_range(spectra, energies, e_min, e_max, shift_value):
         shift_value (float): value to shift spectra to
 
     Returns:
-        _type_: _description_
+         array: shifted spectra
     """
     temp = []
     idx_max = min(range(len(energies)), key=lambda i: abs(energies[i]-e_min))
@@ -99,11 +103,14 @@ def shift_correction_range(spectra, energies, e_min, e_max, shift_value):
         temp.append(np.array(spec)+shift)
     return temp
 
+
 def get_from_dict(dataDict, mapList):
     return reduce(operator.getitem, mapList, dataDict)
 
+
 def set_in_dict(dataDict, mapList, value):
     get_from_dict(dataDict, mapList[:-1])[mapList[-1]] = value
+
 
 def generate_deeplotter_input(experiment, x_key_list, y_key_list, swap_domain_units=False):
     """ Constructs 3D data array that is used as an input to the deeplotter package
@@ -122,36 +129,39 @@ def generate_deeplotter_input(experiment, x_key_list, y_key_list, swap_domain_un
     if swap_domain_units:
         energies = 1240/energies
     # construct grid of scan values
-    xvalues = sorted(set([get_from_dict(scan, x_key_list) for scan in experiment['master_data'].values()]))
-    yvalues = sorted(set([get_from_dict(scan, y_key_list) for scan in experiment['master_data'].values()]))
+    xvalues = sorted(set([get_from_dict(scan, x_key_list)
+                     for scan in experiment['master_data'].values()]))
+    yvalues = sorted(set([get_from_dict(scan, y_key_list)
+                     for scan in experiment['master_data'].values()]))
     xcoord, ycoord = np.meshgrid(xvalues, yvalues)
     # reconstruct coordinate array and array of corresponding scan IDs
     idx_grid = np.ones_like(xcoord)
     for x, y in list(product(xvalues, yvalues)):
         for idx, scan in experiment['master_data'].items():
             if get_from_dict(scan, x_key_list) == x and get_from_dict(scan, y_key_list) == y:
-                scan_index = idx  
+                scan_index = idx
         j = np.argwhere(xcoord == x)[0][1]
         i = np.argwhere(ycoord == y)[0][0]
-        idx_grid[i,j] = scan_index
+        idx_grid[i, j] = scan_index
     # construct 3D data array
     data_threeD = np.zeros((len(yvalues), len(xvalues), len(energies)))
     for x, y in list(product(xvalues, yvalues)):
         for idx, scan in experiment['master_data'].items():
-            if get_from_dict(scan, x_key_list) == x and get_from_dict(scan, y_key_list) == y: 
+            if get_from_dict(scan, x_key_list) == x and get_from_dict(scan, y_key_list) == y:
                 j = np.argwhere(xcoord == x)[0][1]
                 i = np.argwhere(ycoord == y)[0][0]
                 try:
-                    data_threeD[i,j] = experiment['master_data'][idx]['data']['reflection contrast']
+                    data_threeD[i, j] = experiment['master_data'][idx]['data']['reflection contrast']
                 except KeyError:
                     try:
-                        data_threeD[i,j] = experiment['master_data'][idx]['data']['spec dark subtracted']
+                        data_threeD[i, j] = experiment['master_data'][idx]['data']['spec dark subtracted']
                     except KeyError:
-                        data_threeD[i,j] = experiment['master_data'][idx]['data']['spec']       
+                        data_threeD[i, j] = experiment['master_data'][idx]['data']['spec']
     xvalues = np.array(xvalues)
     yvalues = np.array(yvalues)
     args = {'x': xvalues, 'y': yvalues, 'z': energies, 'data': data_threeD}
     return args
+
 
 def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
     """ Adds a reference or dark to a Lightwork savefile and resaves the dataset
@@ -166,16 +176,19 @@ def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
     # add spectra to dataset
     for scan in experiment['master_data'].values():
         if dark is not None and ref is not None:
-            scan['data']['spec dark subtracted'] = scan['data']['spec'] - np.array(dark)
-            scan['data']['reflection contrast'] = (scan['data']['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
+            scan['data']['spec dark subtracted'] = scan['data']['spec'] - \
+                np.array(dark)
+            scan['data']['reflection contrast'] = (
+                scan['data']['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
         elif dark is not None and ref is None:
-            scan['data']['spec dark subtracted'] = scan['data']['spec'] - np.array(dark)
+            scan['data']['spec dark subtracted'] = scan['data']['spec'] - \
+                np.array(dark)
         elif dark is None and ref is not None:
             scan['data']['reflection contrast'] = (
                 scan['data']['spec'] - np.array(ref)) / np.array(ref)
-                # save file
+            # save file
     with open(path_to_pkl, "wb") as f:
-            pickle.dump(experiment, f)
+        pickle.dump(experiment, f)
 
 
 def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title='', legend_var='', cmap='Greys', cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None):
@@ -195,17 +208,18 @@ def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title
         z_min (float, optional): zmin of contourplot. Defaults to None.
         z_max (float, optional): zmax of contourplot. Defaults to None.
     """
-    energies = 1240/np.array(experiment['master_data'][0]['data']['wavelengths'])
+    energies = 1240 / \
+        np.array(experiment['master_data'][0]['data']['wavelengths'])
     spectra = []
     sorter = []
     for scan in experiment['master_data'].values():
         try:
-           spectra.append(scan['data']['reflection contrast'])
+            spectra.append(scan['data']['reflection contrast'])
         except KeyError:
             try:
                 spectra.append(scan['data']['spec dark subtracted'])
             except KeyError:
-                spectra.append(scan['data']['spec'])  
+                spectra.append(scan['data']['spec'])
         sorter.append(get_from_dict(scan, map_to_sorter))
     spectra = np.array(spectra)
     sorter = np.array(sorter)
@@ -237,7 +251,3 @@ def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title
     plt.colorbar(contourplot, ax=axs[0], pad=0.02)
     fig.suptitle(title, fontsize=35)
     plt.show()
-
-
-
-

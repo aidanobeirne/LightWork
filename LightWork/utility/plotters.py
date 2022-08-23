@@ -12,10 +12,9 @@ try:
 except Exception:
     traceback.print_exc()
 
+
 class ShallowPlotter():
     """ Tool to plot 2D LightWork data (i.e. only one variable is scanned)
-    TODO:
-    rescale ylim on axs[1] whenever a spectrum is deleted
     """
 
     def __init__(self, *args, **kw):
@@ -35,6 +34,7 @@ class ShallowPlotter():
             'cr_thresholds':    [],
             'sc_e_min':         None,
             'sc_e_max':         None,
+            'shift_value':      0,
             'change_x_units':   False,
             'vmin':             None,
             'vmax':             None,
@@ -53,8 +53,10 @@ class ShallowPlotter():
         self.axs[1].set_ylabel(self.opt['ilabel'])
         self.axs[1].set_xlim((min(self.x), max(self.x)))
         self.axs[1].legend(prop={'size': 10})
-        vmin = self.opt['vmin'] if self.opt['vmin'] is not None else np.min(self.data)
-        vmax = self.opt['vmax'] if self.opt['vmax'] is not None else np.max(self.data)
+        vmin = self.opt['vmin'] if self.opt['vmin'] is not None else np.min(
+            self.data)
+        vmax = self.opt['vmax'] if self.opt['vmax'] is not None else np.max(
+            self.data)
         self.data = self.data.reshape(self.xx.shape)
         self.colormeshplot = self.axs[0].pcolormesh(
             self.xx, self.yy, self.data, vmin=vmin, vmax=vmax, cmap=self.opt['cmap'], shading='auto')
@@ -83,7 +85,7 @@ class ShallowPlotter():
 
         for key, value in kw.items():
             self.opt[key] = value
-        print(len(args))
+
         # construct data
         if len(args) == 3:
             datavars = ['x', 'y', 'data']
@@ -107,11 +109,21 @@ class ShallowPlotter():
             self.data = np.array(self.data)
             self.y = np.array(self.y)
             self.x = np.array(scan['data']['wavelengths'])
-            if self.opt['change_x_units']:
-                self.x = 1240/self.x
-            self.xx, self.yy = np.meshgrid(self.x, self.y)
         else:
             raise ValueError('Incorrect data type format')
+
+        # cosmic ray removal
+        if self.opt['cr_thresholds']:
+            h.RemoveCosmicRaysRecursive(
+                self.data, self.opt['cr_m'], self.opt['cr_thresholds'])
+        # y axis shift
+        if self.opt['sc_e_min'] is not None:
+            h.shift_correction_range(spectra=self.data, energies=self.x,
+                                     e_min=self.opt['sc_e_min'], e_max=self.opt['sc_e_min'], shift_value=self.opt['shift_value'])
+
+        if self.opt['change_x_units']:
+            self.x = 1240/self.x
+        self.xx, self.yy = np.meshgrid(self.x, self.y)
 
     def onclick(self, event):
         if self.shift_is_held:
@@ -127,9 +139,11 @@ class ShallowPlotter():
         elif self.u_is_held:
             yidx = (abs(self.y - event.ydata)).argmin()
             yvalue = self.y[yidx]
-            current_legend_values = np.array([float(key) for key in self.lines.keys()])
+            current_legend_values = np.array(
+                [float(key) for key in self.lines.keys()])
             current_legend_keys = list(self.lines.keys())
-            key_to_remove = current_legend_keys[abs(current_legend_values - yvalue).argmin()]
+            key_to_remove = current_legend_keys[abs(
+                current_legend_values - yvalue).argmin()]
 
             # delete spec and line
             s = self.specs[key_to_remove].pop(0)
@@ -141,6 +155,10 @@ class ShallowPlotter():
 
             self.axs[1].legend(prop={'size': 10})
 
+        # recompute the ax.dataLim
+        self.axs[1].relim()
+        # update ax.viewLim using the new dataLim
+        self.axs[1].autoscale_view()
         self.fig.canvas.draw()
 
     def on_key_press(self, event):
