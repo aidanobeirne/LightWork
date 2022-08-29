@@ -27,7 +27,7 @@ class DaqScanObject():
         self.scan_nest_index = scan_nest_index
         self.scan_instrument_name = name
         self.daq = daq.Task()
-        self.daq.ao_channels.add_ao_voltage_chan(b'{}'.format(chan))
+        self.daq.ao_channels.add_ao_voltage_chan(bytes('{}'.format(chan), 'utf-8'))
         
     def set_scan_value(self, value):
         self.daq.write(value)
