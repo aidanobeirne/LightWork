@@ -10,7 +10,7 @@ from twilio.rest import Client
 
 
 class SimpleScan:
-    def __init__(self, measurement_instrument, scan_instruments, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
+    def __init__(self, measurement_instrument, scan_instruments, ref=None, dark=None, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
                  savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
                  notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
         """
@@ -20,6 +20,10 @@ class SimpleScan:
             THE INSTRUMENT YOU WISH TO ACQUIRE DATA WITH -- USUALLY A CAMERA IN A SPECTROMETER.
         scan_instruments : List of ScanObjects
             A LIST OF INSTRUMENTS WHOSE ATTRIBUTES YOU WISH TO SCAN ACROSS, E.G. KEITHLEY2400.
+        ref : array, optional
+            reference spectrum
+        dark : array, optional
+            dark spectrum
         save_at_every_step : BOOL, optional
             DO YOU WANT TO SAVE A SINGLE MEASUREMENT AT EVERY SCAN STEP? (USEFUL WHEN SCAN INSTRUMENTS ARE UNRELIABLE OR IF YOU ARE DEBUGGING). The default is True.
         laser_shutter : BOOL, optional
@@ -49,6 +53,8 @@ class SimpleScan:
 
         """
         self.measurement_instrument = measurement_instrument
+        self.ref = ref
+        self.dark = dark
         self.save_at_every_step = save_at_every_step
         self.meta_data = {'scan notes': scan_notes}
         self.save_npz = save_npz
@@ -144,6 +150,20 @@ class SimpleScan:
 
             # acquire data
             data = self.measurement_instrument.measure()
+            # apply background subtraction etc
+            if self.dark is not None and self.ref is not None:
+                data['ref'] = self.ref
+                data['spec dark subtracted'] = data['spec'] - \
+                    np.array(self.dark)
+                data['reflection contrast'] = (
+                    data['spec'] - np.array(self.ref)) / (np.array(self.ref) - np.array(self.dark))
+            elif self.dark is not None and self.ref is None:
+                data['spec dark subtracted'] = data['spec'] - \
+                    np.array(self.dark)
+            elif self.dark is None and self.ref is not None:
+                data['ref'] = self.ref
+                data['reflection contrast'] = (
+                    data['spec'] - np.array(self.ref)) / np.array(self.ref)
 
             # Save the data at every step if desired
             if self.save_at_every_step:
@@ -322,12 +342,16 @@ class SingleSpec:
             data = self.measurement_instrument.measure()
         # apply background subtraction etc
             if dark is not None and ref is not None:
+                data['ref'] = ref
+                data['dark'] = dark
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
                 data['reflection contrast'] = (
-                    data['spec dark subtracted'] - np.array(ref)) / (np.array(ref) - np.array(dark))
+                    data['spec'] - np.array(ref)) / (np.array(ref) - np.array(dark))
             elif dark is not None and ref is None:
+                data['dark'] = dark
                 data['spec dark subtracted'] = data['spec'] - np.array(dark)
             elif dark is None and ref is not None:
+                data['ref'] = ref
                 data['reflection contrast'] = (
                     data['spec'] - np.array(ref)) / np.array(ref)
         # Add to the master_data dictionary
