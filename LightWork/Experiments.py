@@ -10,9 +10,9 @@ from twilio.rest import Client
 
 
 class SimpleScan:
-    def __init__(self, measurement_instrument, scan_instruments, ref=None, dark=None, save_at_every_step=True, laser_shutter=False, laser_shutter_SN='37005097',
-                 savepath=os.getcwd(), savename='data', scan_notes='', save_npz=True,
-                 notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="+12059021472", twilio_from="+16827100017"):
+    def __init__(self, measurement_instrument, scan_instruments, ref=None, dark=None, save_at_every_step=False, laser_shutter=False, laser_shutter_SN='37005097',
+                 savepath=os.getcwd(), savename='data', scan_notes='', save_npz=False,
+                 notify_me=False, ACCOUNT_SID='', AUTH_TOKEN='', twilio_to="", twilio_from=""):
         """
         Parameters
         ----------
@@ -43,9 +43,9 @@ class SimpleScan:
         AUTH_TOKEN : STR, optional
             TWILIO ACCOUNT TOKEN. The default is ''.
         twilio_to : STR, optional
-            PHONE NUMBER TO SEND MESSAGE TO. The default is "+12059021472".
+            PHONE NUMBER TO SEND MESSAGE TO. The default is "".
         twilio_from : STR, optional
-           PHONE NUMBER TO SEND MESSAGE FROM. The default is "+16827100017".
+           PHONE NUMBER TO SEND MESSAGE FROM. The default is "".
 
         Returns
         -------
