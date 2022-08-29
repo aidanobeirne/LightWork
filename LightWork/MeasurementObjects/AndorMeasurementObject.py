@@ -9,7 +9,7 @@ import signal
 
 
 class AndorMeasurementObject():
-    def __init__(self, name='andor', exposure_in_s=1, numavgs=1, vcent=120, vheight=21, AcquisitionMode=1, Readmode=3, temperature=-89, wait_to_cool=True, path_to_domain=None):
+    def __init__(self, name='andor', exposure_in_s=1, numavgs=1, vcent=120, vheight=21, AcquisitionMode=1, PreAmpGain=1.0, Readmode=3, temperature=-89, wait_to_cool=True, path_to_domain=None):
         """Measurement object for the Newton andor Si CCD. Note that this class does not control the Shamrock spectrometer. To use this MeasurementObject, first open
         Andor Solis software and set the spectrometer parameters to whatever you desire. Then close Solis and click 'save' when prompted to save acquisition settings. Once 
         Solis is closed, you can use this class to acquire data.
@@ -33,7 +33,8 @@ class AndorMeasurementObject():
                           'numavgs': numavgs,
                           'AcquisitionMode': AcquisitionMode,
                           'Readmode': Readmode,
-                          'temperature in C': temperature
+                          'temperature in C': temperature,
+                          'PreAmpGain': PreAmpGain
                           }
 
         self.scan_instrument_name = name
@@ -41,7 +42,7 @@ class AndorMeasurementObject():
         signal.signal(signal.SIGINT, self.signal_handler)
         self.cam.SetTriggerMode(0)
         self.cam.SetShutter(1, 1, 0, 0)
-        self.cam.SetPreAmpGain(0)
+        self.cam.SetPreAmpGain(PreAmpGain)
         self.cam.SetEMCCDGain(1)
         self.cam.SetCoolerMode(1)
         self.cam.SetReadMode(Readmode)
@@ -91,4 +92,4 @@ class AndorMeasurementObject():
         sys.exit(0)
 
     def close(self):
-        pass
+        self.cam.ShutDown()
