@@ -115,12 +115,12 @@ class ShallowPlotter():
 
         # cosmic ray removal
         if self.opt['cr_thresholds']:
-            h.RemoveCosmicRaysRecursive(
-                self.data, self.opt['cr_m'], self.opt['cr_thresholds'])
+            self.data = np.array(h.RemoveCosmicRaysRecursive(
+                self.data, self.opt['cr_m'], self.opt['cr_thresholds']))
         # y axis shift
         if self.opt['sc_e_min'] is not None:
-            h.shift_correction_range(spectra=self.data, energies=self.x,
-                                     e_min=self.opt['sc_e_min'], e_max=self.opt['sc_e_min'], shift_value=self.opt['shift_value'])
+            self.data = np.array(h.shift_correction_range(spectra=self.data, energies=self.x,
+                                                          e_min=self.opt['sc_e_min'], e_max=self.opt['sc_e_max'], shift_value=self.opt['shift_value']))
 
         if self.opt['change_x_units']:
             self.x = 1240/self.x
