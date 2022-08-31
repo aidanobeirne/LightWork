@@ -215,7 +215,8 @@ class FuncGen:
             self.instrument_limits = {
                 "frequency lims": ({"min": 1e-6, "max": 25e6}, "Hz"),
                 "voltage lims": (
-                    {"50ohm": {"min": -5, "max": 5}, "highZ": {"min": -10, "max": 10}},
+                    {"50ohm": {"min": -5, "max": 5},
+                        "highZ": {"min": -10, "max": 10}},
                     "V",
                 ),
                 "amplitude lims": (
@@ -226,14 +227,16 @@ class FuncGen:
                     "Vpp",
                 ),
             }
-            self._arbitrary_waveform_length = [2, 8192]  # min length, max length
+            self._arbitrary_waveform_length = [
+                2, 8192]  # min length, max length
             self._arbitrary_waveform_resolution = 16383  # 14 bit
             self._max_waveform_memory_user_locations = 255
         elif np.any(["AFG1062" in a for a in [self._model, self._override_compat]]):
             self.instrument_limits = {
                 "frequency lims": ({"min": 1e-6, "max": 60e6}, "Hz"),
                 "voltage lims": (
-                    {"50ohm": {"min": -5, "max": 5}, "highZ": {"min": -10, "max": 10}},
+                    {"50ohm": {"min": -5, "max": 5},
+                        "highZ": {"min": -10, "max": 10}},
                     "V",
                 ),
                 "amplitude lims": (
@@ -244,14 +247,16 @@ class FuncGen:
                     "Vpp",
                 ),
             }
-            self._arbitrary_waveform_length = [2, 1e6]  # min length, max length
+            self._arbitrary_waveform_length = [
+                2, 1e6]  # min length, max length
             self._arbitrary_waveform_resolution = 16383  # 14 bit
             self._max_waveform_memory_user_locations = 31
         elif np.any(["AFG3022" in a for a in [self._model, self._override_compat]]):
             self.instrument_limits = {
                 "frequency lims": ({"min": 1e-6, "max": 25e6}, "Hz"),
                 "voltage lims": (
-                    {"50ohm": {"min": -5, "max": 5}, "highZ": {"min": -10, "max": 10}},
+                    {"50ohm": {"min": -5, "max": 5},
+                        "highZ": {"min": -10, "max": 10}},
                     "V",
                 ),
                 "amplitude lims": (
@@ -262,7 +267,8 @@ class FuncGen:
                     "Vpp",
                 ),
             }
-            self._arbitrary_waveform_length = [2, 65536]  # min length, max length
+            self._arbitrary_waveform_length = [
+                2, 65536]  # min length, max length
             self._arbitrary_waveform_resolution = 16383  # 14 bit
             self._max_waveform_memory_user_locations = 4
         else:
@@ -301,7 +307,8 @@ class FuncGen:
             `pyvisa.constants.StatusCode.success`
         """
         num_bytes = self._inst.write(command)
-        self._check_pyvisa_status(command, custom_err_message=custom_err_message)
+        self._check_pyvisa_status(
+            command, custom_err_message=custom_err_message)
         return num_bytes
 
     def query(self, command: str, custom_err_message: str = None) -> str:
@@ -329,7 +336,8 @@ class FuncGen:
             `pyvisa.constants.StatusCode.success`
         """
         response = self._inst.query(command).strip()
-        self._check_pyvisa_status(command, custom_err_message=custom_err_message)
+        self._check_pyvisa_status(
+            command, custom_err_message=custom_err_message)
         return response
 
     def _check_pyvisa_status(self, command: str, custom_err_message: str = None):
@@ -393,6 +401,15 @@ class FuncGen:
         """
         return [ch.get_settings() for ch in self.channels]
 
+    def get_settings_with_phase(self):
+        settings = self.get_settings()
+        settings[0]['Phase deg'] = np.rad2deg(
+            float(fgen.query(f"SOURCE1:PHASE?")))
+        settings[1]['Phase deg'] = np.rad2deg(
+            float(fgen.query(f"SOURCE2:PHASE?")))
+        settings_dict = {'CH1': settings[0], 'CH2': settings[1]}
+        return settings_dict
+
     def print_settings(self):
         """Prints table of the current setting for both channels"""
         settings = self.get_settings()
@@ -404,16 +421,19 @@ class FuncGen:
             for ch_settings in settings
         ]
         padding = [key_padding] + ch_paddings
-        print(f"\nCurrent settings for {self._maker} {self._model} {self._serial}\n")
+        print(
+            f"\nCurrent settings for {self._maker} {self._model} {self._serial}\n")
         row_format = "{:>{padd[0]}s} {:{padd[1]}s} {:{padd[2]}s} {}"
-        table_header = row_format.format("Setting", "Ch1", "Ch2", "Unit", padd=padding)
+        table_header = row_format.format(
+            "Setting", "Ch1", "Ch2", "Unit", padd=padding)
         print(table_header)
         print("=" * len(table_header))
         for (ch1key, (ch1val, unit)), (_, (ch2val, _)) in zip(
             settings[0].items(), settings[1].items()
         ):
             print(
-                row_format.format(ch1key, str(ch1val), str(ch2val), unit, padd=padding)
+                row_format.format(ch1key, str(ch1val), str(
+                    ch2val), unit, padd=padding)
             )
 
     def set_settings(self, settings: List[dict]):
@@ -637,9 +657,10 @@ class FuncGen:
 
     def set_constant_offset(self, offset, channel=1):
         # flat_wfm = int(self.arbitrary_waveform_resolution/2)*np.ones(2).astype(np.int32)
-        flat_wfm = int(self.arbitrary_waveform_resolution/2)*np.ones(2).astype(np.int32)
+        flat_wfm = int(self.arbitrary_waveform_resolution/2) * \
+            np.ones(2).astype(np.int32)
         self.set_custom_waveform(flat_wfm, memory_num=255, normalise=False)
-        if channel==1:
+        if channel == 1:
             self.ch1.set_function("USER255")
             self.ch1.set_offset(2)
         else:
@@ -850,7 +871,8 @@ class FuncGenChannel:
     def set_stricter_limits(self):
         """Set limits for the voltage and frequency limits of the channel output
         through a series of prompts"""
-        print(f"Set stricter voltage and frequency limits for channel {self._channel}")
+        print(
+            f"Set stricter voltage and frequency limits for channel {self._channel}")
         print("Use enter only to leave a limit unchanged.")
         # Go through the different limits in the instrument_limits dict
         for limit_type, (inst_limit_dict, unit) in self._fgen.instrument_limits.items():
@@ -864,7 +886,8 @@ class FuncGenChannel:
             # Go through the min and max for the limit type
             for key, inst_value in inst_limit_dict.items():
                 # prompt for new value
-                new_value = input(f"  {key} (instrument limit {inst_value}{unit}): ")
+                new_value = input(
+                    f"  {key} (instrument limit {inst_value}{unit}): ")
                 if new_value == "":
                     # Do not change if empty
                     print("\tLimit not changed")
@@ -1004,6 +1027,12 @@ class FuncGenChannel:
             "frequency": (self.get_frequency(), "Hz"),
         }
 
+    def get_settings_with_phase(self):
+        settings = self.get_settings()
+        settings['Phase deg'] = np.rad2deg(
+            float(fgen.query(f"SOURCE1:PHASE?")))
+        return settings
+
     def print_settings(self):
         """Print the settings currently in use for the channel (Recommended
         to use the `FuncGen.print_settings` for printing both channels)
@@ -1013,7 +1042,8 @@ class FuncGenChannel:
         print("\nCurrent settings for channel {}".format(self._channel))
         print("==============================")
         for key, (val, unit) in settings.items():
-            print("{:>{num_char}s} {} {}".format(key, val, unit, num_char=longest_key))
+            print("{:>{num_char}s} {} {}".format(
+                key, val, unit, num_char=longest_key))
 
     def set_settings(self, settings: dict):
         """Set the settings of the channel with a settings dictionary. Will

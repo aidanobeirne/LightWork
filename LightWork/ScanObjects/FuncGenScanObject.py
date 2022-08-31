@@ -2,27 +2,37 @@ import time
 import numpy as np
 import sys
 import os
-from LightWork.ParentClasses import textronix_func_gen
+from LightWork.ParentClasses import textronix_func_gen as tfg
 
 
-class FuncGenScanObject(FuncGen):
+class FuncGenScanObject():
+    """THIS SCANOBJECT NEEDS TO BE REWORKED: currently changes the offset of both channels together (i.e. one can only use this to run 
+    doping sweeps where V_TG = V_BG.)
+    """
     def __init__(self, 
         scan_values,
-        visa_address: str,
-        impedance: Tuple[str, str] = ("highZ",) * 2,
-        timeout: int = 1000,
-        verify_param_set: bool = False,
-        override_compatibility: str = "",
-        verbose: bool = True,):
+        scan_nest_index,
+        name='fg',
+        visa_address='USB0::0x0699::0x0353::2147069::INSTR'):
 
-        super().__init__(FuncGen('ASRL{}::INSTR'.format(address), read_termination='\r'))
-        self.meta_data = {}
         self.scan_values = list(scan_values)
         self.scan_nest_index = scan_nest_index
-        self.scan_instrument_name = 'Function_generator'.format(name)
+        self.scan_instrument_name = name
+        self.visa_address = visa_address
+        with tfg.FuncGen(self.visa_address, verbose=False) as fgen:
+            self.meta_data = fgen.get_settings_with_phase()
         
     def set_scan_value(self, value):
-        pass
+        with tfg.FuncGen(self.visa_address, verbose=False) as fgen:
+            fgen.ch1.set_offset(value)
+            fgen.ch2.set_offset(value)
+
+    def get_scan_value(self):
+        with tfg.FuncGen(self.visa_address, verbose=False) as fgen:
+            offone = fgen.ch1.get_offset()
+            offtwo = fgen.ch2.get_offset()
+        dat = {'deg': {'CH1': offone, 'CH2': offtwo}}
+        return dat
 	
     def get_save_data(self, value=None):
         pass
