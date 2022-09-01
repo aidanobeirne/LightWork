@@ -10,5 +10,5 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     # , 'PyQt5', 'pyqtgraph'], #external packages as dependencies
-    install_requires=['PyMeasure', 'PyVISA', 'twilio', 'nidaqmx', 'pythonnet', 'thorlabs_apt']
+    install_requires=['PyMeasure', 'PyVISA', 'twilio', 'nidaqmx', 'pythonnet', 'thorlabs_apt', 'NewportESP']
 )
