@@ -11,4 +11,27 @@ h.add_ref_or_dark_to_measurement(r'SimpleScanDat\example.pkl')
 with open(r'SimpleScanDat\example.pkl', 'rb') as handle:
         measurement = pickle.load(handle)
 plt.close('all')
-h.plot_sorter_linecut(measurement, ['keithley_TG', 'voltage [V]'], sorter_cuts_to_plot=[3.9, 4, 4.2], title='example', legend_var='voltage', cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None)
+
+opt = {  # default options
+            'spec_staggering':  0,  # amount to displace spectra by
+            'legend_label':     'voltage',
+            'hovering_range':     None,
+            'title':            'title',  # plot title
+            'xlabel':           'x',
+            'ylabel':           'y',
+            'ilabel':           'intensity [a.u.]',
+            'cmap':             'inferno',
+            'cr_m':             3,
+            'cr_thresholds':    [],
+            'sc_e_min':         None,
+            'sc_e_max':         None,
+            'shift_value':      0,
+            'change_x_units':   False,
+            'vmin':             None,
+            'vmax':             None,
+            'display_specs':    [],  # for clicking spectra function
+            'xyhoveri':         [0, 0],  # for on_move
+            'verbose':          False
+        }
+
+plot = h.ShallowPlotter(measurement, ['keithley_TG', 'voltage [V]'], **opt)
