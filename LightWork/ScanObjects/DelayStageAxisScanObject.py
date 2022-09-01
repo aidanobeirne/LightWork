@@ -12,6 +12,7 @@ class DelayStageScanObject(newportESP.Axis):
         self.on()
         if home:
             self.home_search()
+        self.meta_data = {}
         
     def set_scan_value(self, value):
         self.move_to(value, wait=True)
