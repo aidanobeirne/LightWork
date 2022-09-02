@@ -93,3 +93,48 @@ class AndorMeasurementObject():
 
     def close(self):
         self.cam.ShutDown()
+
+    @property
+    def binning(self):
+        return self.meta_data['vcent'], self.meta_data['vheight']
+
+    @binning.setter
+    def binning(self, vcent, vheight):
+        self.cam.SetSingleTrack(vcent, vheight)
+        self.meta_data['vcent'] = vcent
+        self.meta_data['vheight'] = vheight
+
+    @property
+    def exposure(self):
+        return self.meta_data['exposure_in_s']
+
+    @exposure.setter
+    def exposure(self, exposure_in_s):
+        self.cam.SetExposureTime(exposure_in_s)
+        self.meta_data['exposure_in_s'] = exposure_in_s
+
+    @property
+    def PreAmpGain(self):
+        return self.meta_data['PreAmpGain']
+
+    @PreAmpGain.setter
+    def PreAmpGain(self, gain):
+        self.cam.SetPreAmpGain(gain)
+        self.meta_data['PreAmpGain'] = gain
+
+    @property
+    def Temperature(self):
+        return self.meta_data['Temperature']
+
+    @Temperature.setter
+    def Temperature(self, temp):
+        self.cam.SetTemperature(temp)
+        self.meta_data['Temperature'] = temp
+
+    @property
+    def numavgs(self):
+        return self.meta_data['numavgs']
+
+    @numavgs.setter
+    def Temperature(self, num):
+        self.meta_data['numavgs'] = num
