@@ -136,5 +136,5 @@ class AndorMeasurementObject():
         return self.meta_data['numavgs']
 
     @numavgs.setter
-    def Temperature(self, num):
+    def numavgs(self, num):
         self.meta_data['numavgs'] = num
