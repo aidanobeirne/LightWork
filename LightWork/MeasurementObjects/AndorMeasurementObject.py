@@ -33,7 +33,7 @@ class AndorMeasurementObject():
                           'numavgs': numavgs,
                           'AcquisitionMode': AcquisitionMode,
                           'Readmode': Readmode,
-                          'temperature in C': temperature,
+                          'temperature': temperature,
                           'PreAmpGain': PreAmpGain
                           }
 
@@ -106,12 +106,12 @@ class AndorMeasurementObject():
 
     @property
     def exposure(self):
-        return self.meta_data['exposure_in_s']
+        return self.meta_data['exposure']
 
     @exposure.setter
     def exposure(self, exposure_in_s):
         self.cam.SetExposureTime(exposure_in_s)
-        self.meta_data['exposure_in_s'] = exposure_in_s
+        self.meta_data['exposure'] = exposure_in_s
 
     @property
     def PreAmpGain(self):
@@ -124,12 +124,12 @@ class AndorMeasurementObject():
 
     @property
     def Temperature(self):
-        return self.meta_data['Temperature']
+        return self.meta_data['temperature']
 
     @Temperature.setter
     def Temperature(self, temp):
         self.cam.SetTemperature(temp)
-        self.meta_data['Temperature'] = temp
+        self.meta_data['temperature'] = temp
 
     @property
     def numavgs(self):
