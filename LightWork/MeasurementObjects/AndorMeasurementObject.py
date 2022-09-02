@@ -71,14 +71,14 @@ class AndorMeasurementObject():
             print('STABILIZED')
 
     def measure(self):
-        if self.meta_data['numavgs'] is not None:
+        if self.meta_data['numavgs'] > 1:
             spectra = []
             for i in range(self.meta_data['numavgs']):
                 self.cam.StartAcquisition()
                 spec = []
                 self.cam.GetAcquiredData(spec)
                 spectra.append(spec)
-            spec = np.mean(spectra)
+            spec = np.mean(spectra, axis=0)
         else:
             self.cam.StartAcquisition()
             spec = []
