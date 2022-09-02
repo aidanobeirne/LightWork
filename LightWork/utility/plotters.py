@@ -31,6 +31,7 @@ class ShallowPlotter():
             'ylabel':           'y',
             'ilabel':           'intensity [a.u.]',
             'cmap':             'inferno',
+            'shading':          'gouraud',
             'cr_m':             3,
             'cr_thresholds':    [],
             'sc_e_min':         None,
@@ -60,7 +61,7 @@ class ShallowPlotter():
             self.data)
         self.data = self.data.reshape(self.xx.shape)
         self.colormeshplot = self.axs[0].pcolormesh(
-            self.xx, self.yy, self.data, vmin=vmin, vmax=vmax, cmap=self.opt['cmap'], shading='auto')
+            self.xx, self.yy, self.data, vmin=vmin, vmax=vmax, cmap=self.opt['cmap'], shading=self.opt['shading'])
         # plt.colorbar(self.colormeshplot, ax=self.axs[0], pad=0.02)
 
         self.fig.suptitle(self.opt['title'], fontsize=35)
@@ -113,18 +114,18 @@ class ShallowPlotter():
         else:
             raise ValueError('Incorrect data type format')
 
+        if self.opt['change_x_units']:
+            self.x = 1240/self.x
+        self.xx, self.yy = np.meshgrid(self.x, self.y)
+
         # cosmic ray removal
         if self.opt['cr_thresholds']:
             self.data = np.array(h.RemoveCosmicRaysRecursive(
                 self.data, self.opt['cr_m'], self.opt['cr_thresholds']))
         # y axis shift
         if self.opt['sc_e_min'] is not None:
-            self.data = np.array(h.shift_correction_range(spectra=self.data, energies=self.x,
+            self.data = np.array(h.shift_correction_range(spectra=self.data, energies=np.array(self.x),
                                                           e_min=self.opt['sc_e_min'], e_max=self.opt['sc_e_max'], shift_value=self.opt['shift_value']))
-
-        if self.opt['change_x_units']:
-            self.x = 1240/self.x
-        self.xx, self.yy = np.meshgrid(self.x, self.y)
 
     def onclick(self, event):
         if self.shift_is_held:
