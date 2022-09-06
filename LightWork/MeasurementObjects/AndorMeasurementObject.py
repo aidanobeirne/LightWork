@@ -138,3 +138,11 @@ class AndorMeasurementObject():
     @numavgs.setter
     def numavgs(self, num):
         self.meta_data['numavgs'] = num
+
+    # @property
+    # def Accumulations(self):
+    #     return self.meta_data['accumulations']
+
+    # @Accumulations.setter
+    # def Accumulations(self, num):
+    #     self.cam.SetNumberAccumulations(num)
