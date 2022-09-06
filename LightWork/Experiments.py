@@ -237,10 +237,11 @@ class SimpleScan:
         save_data['data'] = data
         meta_data = copy.deepcopy(self.meta_data)
         for instrument, value in zip(self.scan_instruments, scan_values):
-            #            try:
-            #                save_data['{}'.format(instrument.scan_instrument_name)] = instrument.get_save_data(value)
-            #            except TypeError:
-            #                pass
+            try:
+                save_data['{}'.format(
+                    instrument.scan_instrument_name)] = instrument.get_save_data(value)
+            except TypeError:
+                pass
             try:
                 meta_data['{}'.format(
                     instrument.scan_instrument_name)] = instrument.meta_data
