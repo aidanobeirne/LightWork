@@ -6,6 +6,7 @@ from functools import reduce
 import operator
 import matplotlib.pyplot as plt
 from itertools import product
+import copy
 import pprint
 
 # Helper functions
@@ -102,6 +103,35 @@ def shift_correction_range(spectra, energies, e_min, e_max, shift_value):
         shift = shift_value - offset
         temp.append(np.array(spec)+shift)
     return temp
+
+def shift_correction_range_experiment(experiment, e_min, e_max, shift_value, spec_key='spec', change_x_units=False):
+    """ Shifts a dataset from a LightWork SimpleScan such that the average of each spectrum over a desired energy range is equal to the shift_value
+    Args:
+        experiment (dictionary): LightWork save dictionary
+        energies (array): 
+        e_min (float): minimum energy of averaging window
+        e_max (float): maximum energy of averaging window
+        shift_value (float): value to shift spectra to
+        spec_key (str): key of spectrum to shift
+
+    Returns:
+         experiment: LightWork save dict with shifted spectra
+    """
+    exp = copy.deepcopy(experiment)
+
+    if change_x_units:
+        energies = 1240/experiment['master_data'][0]['data']['wavelengths']
+    else:
+        energies = experiment['master_data'][0]['data']['wavelengths']
+
+    idx_max = min(range(len(energies)), key=lambda i: abs(energies[i]-e_min))
+    idx_min = min(range(len(energies)), key=lambda i: abs(energies[i]-e_max))
+    for idx, scan in experiment['master_data'].items():
+        spec = scan['data'][spec_key]
+        offset = np.mean(spec[idx_min:idx_max])
+        shift = shift_value - offset
+        exp['master_data'][idx]['data'][spec_key] = np.array(spec)+shift
+    return exp
 
 
 def get_from_dict(dataDict, mapList):

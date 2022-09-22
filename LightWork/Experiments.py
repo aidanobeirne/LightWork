@@ -194,7 +194,7 @@ class SimpleScan:
                 to=self.twilio_to,
                 from_=self.twilio_from,
                 body='Scan took {} hours and {} minutes'.format(
-                    int(np.floor(self.scan_time)), int(np.rint(60*(self.scan_time % 1))))
+                    int(np.floor(scan_time)), int(np.rint(60*(scan_time % 1))))
             )
 
     def save_data_npz(self, scan_values, data, unique_ID):

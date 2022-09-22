@@ -3,15 +3,15 @@ import time
 
 
 class CageRotatorScanObject_apt():
-    def __init__(self, scan_values, SN_motor='55164594', name='Cage Rotator', scan_nest_index=0):
+    def __init__(self, scan_values, SN_motor=55164594, name='Cage Rotator', scan_nest_index=0):
         """
     
         Parameters
         ----------
         scan_values : LIST OR ARRAY
             ANGLES TO SCAN CAGE ROTATOR OVER. 
-        SN_motor : STR, optional
-            SERIAL NUMBER OF THE THORLABS CAGE ROTATOR. The default is '55164244'.
+        SN_motor : INT, optional
+            SERIAL NUMBER OF THE THORLABS CAGE ROTATOR. The default is 55164244.
         name : STR, optional
             UNIQUE NAME FOR THIS CAGE ROTATOR. The default is 'analyzer'.
         scan_nest_index : INT, optional
@@ -25,7 +25,7 @@ class CageRotatorScanObject_apt():
         """
         self.motor = apt.Motor(SN_motor)
         self.motor.enable()
-        self.motor.move_home(blocking=True)
+        # self.motor.move_home(blocking=True)
         # self.motor.set_velocity_parameters(8,10,10)
         self.meta_data = {'name':name}
         self.scan_values = list(scan_values)
@@ -33,11 +33,12 @@ class CageRotatorScanObject_apt():
         self.scan_instrument_name = name
         
     def set_scan_value(self, value):
-        self.motor.move_to(value, blocking=True)
-        # moving = self.motor.is_in_motion
-        # while moving ==True:
-        #     moving = self.motor.is_in_motion
-        #     time.sleep(0.01)
+        # self.motor.move_to(value, blocking=True)
+        moving = self.motor.is_in_motion
+        while moving ==True:
+            moving = self.motor.is_in_motion
+            time.sleep(0.01)
+        print('cage rotator = {} degrees'.format(value))
 
     def get_scan_value(self):
         return 'degrees', self.motor.position
