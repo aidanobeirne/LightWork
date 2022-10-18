@@ -104,6 +104,7 @@ def shift_correction_range(spectra, energies, e_min, e_max, shift_value):
         temp.append(np.array(spec)+shift)
     return temp
 
+
 def shift_correction_range_experiment(experiment, e_min, e_max, shift_value, spec_key='spec', change_x_units=False):
     """ Shifts a dataset from a LightWork SimpleScan such that the average of each spectrum over a desired energy range is equal to the shift_value
     Args:
@@ -231,6 +232,31 @@ def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
             # save file
     with open(path_to_pkl, "wb") as f:
         pickle.dump(experiment, f)
+
+
+def add_refscan_to_samplescan(path_to_sample_scan, path_to_ref_scan, mapList=['Analyzer', 'angle [degrees]']):
+    with open(r"{}".format(path_to_sample_scan), 'rb') as handle:
+        experiment = pickle.load(handle)
+    with open(r"{}".format(path_to_ref_scan), 'rb') as handle:
+        ref = pickle.load(handle)
+    for key, scan in experiment['master_data'].values():
+        value = scan[mapList[0]][mapList[1]]
+        for refscan in ref['master_data'].values():
+            ref_value = refscan[mapList[0]][mapList[1]]
+            if ref_value == value:
+                ref = refscan['data']['spec']
+                scan['data']['ref'] = ref
+                try:
+                    scan['data']['dark'] = scan['data']['dark']
+                except KeyError:
+                    scan['data']['dark'] = refscan['data']['dark']
+                scan['data']['spec dark subtracted'] = scan['data']['spec'] - \
+                    np.array(scan['data']['dark'])
+                scan['data']['reflection contrast'] = (
+                    scan['data']['spec'] - np.array(ref)) / (np.array(ref) - np.array(scan['data']['dark']))
+
+    with open(r"{}".format(path_to_sample_scan), 'wb') as handle:
+        pickle.dump(experiment, handle)
 
 
 def plot_sorter_linecut(experiment, map_to_sorter, sorter_cuts_to_plot=[], title='', legend_var='', cmap='Greys', cr_m=3, cr_thresholds=[], sc_e_min=None, sc_e_max=None, z_min=None, z_max=None):
