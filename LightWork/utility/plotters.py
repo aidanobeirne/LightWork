@@ -108,11 +108,12 @@ class ShallowPlotter():
                     except KeyError:
                         self.data.append(scan['data']['spec'])
                 self.y.append(h.get_from_dict(scan, self.map_to_sorter))
+                self.x = np.array(scan['data']['wavelengths'])
 
             self.data = np.array([s for _, s in sorted(zip(self.y, self.data))])
             # self.data = np.array(self.data)
             self.y = np.array(sorted(self.y))
-            self.x = np.array(scan['data']['wavelengths'])
+            
         else:
             raise ValueError('Incorrect data type format')
 

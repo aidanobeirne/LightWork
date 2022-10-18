@@ -118,11 +118,12 @@ def shift_correction_range_experiment(experiment, e_min, e_max, shift_value, spe
          experiment: LightWork save dict with shifted spectra
     """
     exp = copy.deepcopy(experiment)
+    key = list(experiment['master_data'].keys())[0]
 
     if change_x_units:
-        energies = 1240/experiment['master_data'][0]['data']['wavelengths']
+        energies = 1240/experiment['master_data'][key]['data']['wavelengths']
     else:
-        energies = experiment['master_data'][0]['data']['wavelengths']
+        energies = experiment['master_data'][key]['data']['wavelengths']
 
     idx_max = min(range(len(energies)), key=lambda i: abs(energies[i]-e_min))
     idx_min = min(range(len(energies)), key=lambda i: abs(energies[i]-e_max))
