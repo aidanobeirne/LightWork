@@ -33,7 +33,6 @@ class jyUnits(Enum):
     jyuPixels = 28
     jyuTotalUnitsPlusOne = 29
 
-
 class jyUnitsType(Enum):
     jyutWavelength = 0
     jyutSlitWidth = 1
@@ -43,7 +42,58 @@ class jyUnitsType(Enum):
     jyutSpatial = 5
     jyutTotalTypesPlusOne = 6
 
-
 class jyCCDDataType(Enum):
     JYMCD_ACQ_FORMAT_IMAGE = 0
     JYMCD_ACQ_FORMAT_SCAN = 1
+
+class jyDeviceOperatingMode(Enum):
+    jyDevOpModeNormal = 0
+    jyDevOpModeAcqHWTimeBased = 1
+    jyDevOpModeAcqSWTimeBased = 2
+    jyDevOpModeAcqFKBurst = 3
+    jyDevOpModeAcqFKBlast = 4
+    jyDevOpModeAcqICCD = 5
+    jyDevOpModeAcqAllowIntermediateRead = 6
+    jyDevOpModeLAST = 7
+
+class jyHardwareProperty(Enum):
+    jyUndefined = 0
+    jypMonoLinearDispersion = 1
+    jypMonoBacklashAmount = 2
+    jypMonoStepsPerUnit = 3
+    jypMonoBaseUnits = 4
+    jypMonoBaseGrating = 5
+    jypMonoCurrentGrating = 6
+    jypMonoMaxLimit = 7
+    jypMonoMinLimit = 8
+    jypMonoTiltAngle = 9
+    jypMonoIncludedAngle = 10
+    jypMonoFocalLength = 11
+    jypMonoOrder = 12
+    jypMonoCurrentWavelength = 13
+    jypMonoMCDWavelengthDirection = 14
+    jypBandpassUnits = 15
+    jypSlitMaxLimit = 16
+    jypSlitMinLimit = 17
+    jypSlitBackLashAmount = 18
+    jypSlitBaseUnits = 19 
+    jypSlitStepsPerUnit = 20
+    jypLaserLine = 21
+    jypTotalHardwarePropertiesPlusOne = 22
+
+class jyCommType(Enum):
+    no_comm = 0
+    jyGPIB = 1
+    jySerial = 2
+    jyIP = 3
+    jyUSB = 4
+
+class jyCommParamType(Enum):
+    yCPTUndefined = 0
+    jyCPTCommType = 1
+    jyCPTPortNum = 2
+    jyCPTDeviceName = 3
+    jyCPTBaudRate = 4
+    jyCPTDatabits = 5
+    jyCPTParitybits = 6
+    jyCPTStopbits = 7
