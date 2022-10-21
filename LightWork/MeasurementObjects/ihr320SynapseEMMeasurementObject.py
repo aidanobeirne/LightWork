@@ -1,8 +1,9 @@
 
 from LightWork.ParentClasses.HJY import synapseEM_barebones, ihr320
+import numpy as np
 
 
-class JobinYvonMeasurementObject():
+class ihr320SynapseEMMeasurementObject():
     def __init__(self, name='ihr320_synapseEM', exposure_in_s=1, grating=1, numavgs=1, center_wl=700, ystart=75, yend=125, slitwidth_mm=1.0):
         """Measurement object for the ihr320 + SynapseEM
         """
@@ -33,12 +34,17 @@ class JobinYvonMeasurementObject():
             }
         self.synapseEM = synapseEM_barebones.synapseEM_barebones(**opt)
 
-
-        self.wavelengths = None
+        x, y = self.synapseEM.COM.GetChipSize()
+        self.wavelengths = np.zeroes(len(x))
+        self.spectrum_counts = np.zeroes(len(x))
 
     def measure(self):
-        spec = self.synapseEM.acquire()
-        data = {'wavelengths': self.wavelengths, 'spec': spec}
+        for i in range(self.meta_data['numavgs']):
+            self.spectrum_counts += self.synapseEM.acquire()
+
+        self.spectrum_counts = self.spectrum_counts/self.meta_data['numavgs']
+        data = {'wavelengths': self.wavelengths, 'spec': self.spectrum_counts}
+        self.spectrum_counts = np.zeroes_like(self.wavelengths)
         return data
 
     def close(self):

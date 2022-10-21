@@ -25,7 +25,7 @@ class synapseEM_barebones():
             'XBin': 1,
             'YBin': 200,
             'Gain': None,
-            'verbose': False
+            'debug': False
         }
 
         wc.pythoncom.CoInitialize()
@@ -34,9 +34,10 @@ class synapseEM_barebones():
         self.COM.Load()
         self.COM.OpenCommunications()
         self.COM.initialize()
-        time.sleep(1)
+        time.sleep(3)
+        self.old_protocol()
 
-        self.COM.SetDefaultUnits(jyUnitsType.jyutTime.value, jyUnits.jyuSeconds.value)
+        # self.COM.SetDefaultUnits(jyUnitsType.jyutTime.value, jyUnits.jyuSeconds.value)
         self._process_kw()
         self.COM.DefineArea(self.opt['areaNum'], 
                             self.opt['XOrigin'],
@@ -45,8 +46,10 @@ class synapseEM_barebones():
                             self.opt['YSize'],
                             self.opt['XBin'],
                             self.opt['YBin'])
-        self.COM.IntegrationTime = self.opt['IntegrationTime']
-        self.wait = 0.1
+        self.COM.IntegrationTime = self.opt['IntegrationTime_in_s']
+        self.wait = min(0.01, self.opt['IntegrationTime_in_s']/10)
+
+        
 
     def _process_kw(self, *args, **kw):
         '''
@@ -67,7 +70,6 @@ class synapseEM_barebones():
         if self.COM.ReadyForAcquisition == False:
             print('Synapse not ready!')
             return
-    
         self.COM.StartAcquisition(1)
         while True:
             if self.COM.AcquisitionBusy() == False:
@@ -75,6 +77,30 @@ class synapseEM_barebones():
             time.sleep(self.wait)
         dat = np.array(self.COM.GetResult().GetFirstDataObject().GetRawData())
         return dat
+
+    def old_init_protocol(self):
+        print(self.COM.FirmwareVersion)
+        print(self.COM.Description)
+        print(self.COM.Name)
+        x,y = self.COM.GetChipSize()
+        print(x,y)
+        
+        # self.COM.SetDefaultUnits(3,13) #(jyutTime, jyuMilliseconds)
+        self.COM.IntegrationTime = 10
+
+        # set up for image mode
+        self.COM.SelectADC(1) # 1 = 1 MHz
+        self.COM.Gain = 1 # 1 = high dynamic range
+        self.COM.DefineAcquisitionFormat(0,1) #(0,1) for image, (1,1) for spectrum
+        self.COM.DefineArea(1, 1, 1, 1024, 256, 1, 1) 
+
+        print(self.COM.DataSize)
+        self.COM.SetOperatingModeValue(1,  False) # HW 
+        self.COM.NumberOfAccumulations = 1
+        self.COM.AcquisitionCount = 1
+
+        self.spectrum_counts = np.zeros(len(x))
+
 
     def close(self):
         self.COM.CloseCommunications()

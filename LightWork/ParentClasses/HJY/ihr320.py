@@ -73,7 +73,7 @@ class ihr320():
 
     def blocking_function(self):
         print('Changing ihr320 hardware and locking kernel, please wait.')
-        while self.IsBusy():
+        while self.COM.IsBusy():
             time.sleep(0.1)
         print('ihr320 hardware change complete')
 
