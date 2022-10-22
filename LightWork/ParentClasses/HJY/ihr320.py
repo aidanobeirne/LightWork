@@ -11,7 +11,7 @@ class ihr320():
         self.COM.UniqueID = UniqueId
         self.COM.Load()
         self.COM.OpenCommunications()
-        self.COM.initialize()
+        self.COM.initialize(True, False)
         time.sleep(1)
     
     @property

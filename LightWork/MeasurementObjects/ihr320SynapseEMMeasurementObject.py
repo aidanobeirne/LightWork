@@ -4,7 +4,7 @@ import numpy as np
 
 
 class ihr320SynapseEMMeasurementObject():
-    def __init__(self, name='ihr320_synapseEM', exposure_in_s=1, grating=1, numavgs=1, center_wl=700, ystart=75, yend=125, slitwidth_mm=1.0):
+    def __init__(self, name='ihr320_synapseEM', exposure_in_s=1, grating=1, numavgs=1, center_wl=700, ystart=75, yend=125, slitwidth_mm=1.0, path_to_domain=None):
         """Measurement object for the ihr320 + SynapseEM
         """
         self.meta_data = {'exposure': exposure_in_s,
@@ -34,17 +34,12 @@ class ihr320SynapseEMMeasurementObject():
             }
         self.synapseEM = synapseEM_barebones.synapseEM_barebones(**opt)
 
-        x, y = self.synapseEM.COM.GetChipSize()
-        self.wavelengths = np.zeroes(len(x))
-        self.spectrum_counts = np.zeroes(len(x))
-
     def measure(self):
+        spec = []
         for i in range(self.meta_data['numavgs']):
-            self.spectrum_counts += self.synapseEM.acquire()
-
-        self.spectrum_counts = self.spectrum_counts/self.meta_data['numavgs']
-        data = {'wavelengths': self.wavelengths, 'spec': self.spectrum_counts}
-        self.spectrum_counts = np.zeroes_like(self.wavelengths)
+            spec.append(self.synapseEM.acquire())
+        spec = np.mean(spec)
+        data = {'wavelengths': self.wavelengths, 'spec': spec}
         return data
 
     def close(self):
