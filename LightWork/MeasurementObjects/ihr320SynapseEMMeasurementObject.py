@@ -1,10 +1,11 @@
 
 from LightWork.ParentClasses.HJY import synapseEM_barebones, ihr320
 import numpy as np
+import csv
 
 
 class ihr320SynapseEMMeasurementObject():
-    def __init__(self, name='ihr320_synapseEM', exposure_in_s=1, grating=1, numavgs=1, center_wl=700, ystart=75, yend=125, slitwidth_mm=1.0, path_to_domain=None):
+    def __init__(self, name='ihr320_synapseEM', exposure_in_s=1, grating=3, numavgs=1, center_wl=750, ystart=75, yend=125, slitwidth_mm=2.0, path_to_domain=None):
         """Measurement object for the ihr320 + SynapseEM
         """
         self.meta_data = {'exposure': exposure_in_s,
@@ -20,18 +21,25 @@ class ihr320SynapseEMMeasurementObject():
         self.ihr320 = ihr320.ihr320()
         self.ihr320.center_wavelength = center_wl
         self.ihr320.slit_width = slitwidth_mm
-        self.ihr320.turret = grating
+        self.ihr320.turret = int(grating - 1) # Grating labels on spectrometer start indexing at 1 instead of zero
 
+        if path_to_domain is not None:
+            wls = []
+            with open(r"{}".format(path_to_domain)) as f:
+                reader = csv.reader(f, delimiter = '\t')
+                for count, row in enumerate(reader):
+                    if count == 0:
+                        continue
+                    wls.append(float(row[0]))
+            self.wavelengths = np.array(wls[0:1024])
+        else:
+            self.wavelengths = None
 
-        opt = { 
-                'IntegrationTime_in_s': exposure_in_s,
-                'areaNum': 1,
-                'XOrigin': 1,
-                'YOrigin': ystart + 1,
-                'XSize': 1600,
-                'YSize': yend + 1,
-                'XBin': 1,
-            }
+        opt = {  # default options
+            'IntegrationTime_in_s': exposure_in_s,
+            'ystart': ystart,
+            'ystop': yend,
+        }
         self.synapseEM = synapseEM_barebones.synapseEM_barebones(**opt)
 
     def measure(self):
