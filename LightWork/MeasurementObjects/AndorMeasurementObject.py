@@ -60,7 +60,7 @@ class AndorMeasurementObject():
                 for row in spamreader:
                     self.wavelengths.append(float(row[0]))
         else:
-            self.wavelengths = 0
+            self.wavelengths = np.arange(1024)
 
         if wait_to_cool:
             while 'DRV_TEMP_STABILIZED' not in self.cam.GetTemperature():

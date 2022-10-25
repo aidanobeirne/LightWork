@@ -201,6 +201,47 @@ def generate_deeplotter_input(experiment, x_key_list, y_key_list, swap_domain_un
     args = {'x': xvalues, 'y': yvalues, 'z': energies, 'data': data_threeD}
     return args
 
+def generate_deeplotter_input_fast(experiment, x_key_list, y_key_list, swap_domain_units=False):
+    """ Constructs 3D data array that is used as an input to the deeplotter package. Vecterized to improve speed. 
+
+    Args:
+        experiment (Dict): dictionary from imported LightWork save file
+        x_key_list (list): list of strings to navigate to sorter key, e.g. ['keithley_BG, 'voltage [V]']
+        y_key_list (list): same as x_key_list but for y value
+        swap_domain_units (bool, optional): whether or not to swap the domain from enegy to wavelengths or vice versa. Defaults to False.
+
+    Returns:
+        dict: dictionary containing the arguments that go to the deeplotter instance. Just unpack the dictionary to use the output.
+    """
+    # construct domain
+    energies = np.array(experiment['master_data'][0]['data']['wavelengths'])
+    if swap_domain_units:
+        energies = 1240/energies
+    # construct grid of scan values
+    xvalues = [get_from_dict(scan, x_key_list)
+                      for scan in experiment['master_data'].values()]
+    yvalues = [get_from_dict(scan, y_key_list)
+                      for scan in experiment['master_data'].values()]
+    xvalues = np.array(xvalues)
+    yvalues = np.array(yvalues)
+    
+    # construct 3D data array
+    # data_threeD = np.zeros((len(yvalues), len(xvalues), len(energies)))
+    data_key_list = ['data', 'spec']
+    data = np.array([list(get_from_dict(scan, data_key_list))
+                      for scan in experiment['master_data'].values()])
+    data = np.vstack((xvalues,yvalues,data.T)).T
+    data = data[data[:,1].argsort()]
+    data = data[data[:,0].argsort(kind='mergesort')]
+    
+    yvalues = np.sort(np.unique(yvalues))
+    xvalues = np.sort(np.unique(xvalues))
+    data = data[:,2:].reshape(len(xvalues),len(yvalues),len(energies))
+    data = np.transpose(data, (1,0,2))
+
+
+    args = {'x': xvalues, 'y': yvalues, 'z': energies, 'data': data}
+    return args
 
 def add_ref_or_dark_to_experiment(path_to_pkl, ref=None, dark=None):
     """ Adds a reference or dark to a Lightwork savefile and resaves the dataset
