@@ -1,10 +1,14 @@
-import thorlabs_apt as apt
+try:
+    import thorlabs_apt as apt
+except FileNotFoundError:
+    raise FileNotFoundError('Unable to find thorlabs apt dll. See PyPi documentation for instructions on how to resolve this issue')
 import time
 
 
 class CageRotatorScanObject_apt():
     def __init__(self, scan_values, SN_motor=55164594, name='Cage Rotator', scan_nest_index=0):
         """
+        IMPORTANT: TO USE, YOU NEED TO PLACE THE APT DLL IN THE CORRECT PATH. SEE PyPi DOCUMENTATION FOR DETAILS
     
         Parameters
         ----------
@@ -33,7 +37,7 @@ class CageRotatorScanObject_apt():
         self.scan_instrument_name = name
         
     def set_scan_value(self, value):
-        # self.motor.move_to(value, blocking=True)
+        self.motor.move_to(value)#, blocking=True)
         moving = self.motor.is_in_motion
         while moving ==True:
             moving = self.motor.is_in_motion
@@ -47,6 +51,6 @@ class CageRotatorScanObject_apt():
         return {'angle [degrees]': value}
 	
     def close(self):
-        pass
-#        self.close()
+        self.motor.disable()
+        del self.motor
 		
