@@ -36,10 +36,12 @@ class KeithleyScanObject(Keithley2400):
         self.scan_instrument_name = 'keithley_{}'.format(name)
         self.compliance_current = compliance_current
         self.source_enabled = 1
+        self.step_size = 0.01
+        self.pause = 0.01
         self.enable_source()
 
     def set_scan_value(self, value):
-        self.ramp_to_voltage_step_size(value, step_size=0.01, pause=0.01)
+        self.ramp_to_voltage_step_size(value, step_size=self.step_size, pause=self.pause)
 
     def get_scan_value(self):
         return 'voltage', self.voltage[0]
@@ -58,4 +60,4 @@ class KeithleyScanObject(Keithley2400):
         return data
 
     def close(self):
-        self.ramp_to_voltage_step_size(0, step_size=0.01, pause=0.01)
+        self.ramp_to_voltage_step_size(0, step_size=self.step_size, pause=self.pause)
