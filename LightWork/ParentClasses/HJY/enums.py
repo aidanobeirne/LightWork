@@ -34,13 +34,14 @@ class jyUnits(Enum):
     jyuTotalUnitsPlusOne = 29
 
 class jyUnitsType(Enum):
-    jyutWavelength = 0
-    jyutSlitWidth = 1
-    jyutTime = 2
-    jyutTemperature = 3
-    jyutDataUnits = 4
-    jyutSpatial = 5
-    jyutTotalTypesPlusOne = 6
+    jyutUndefined = 0
+    jyutWavelength = 1
+    jyutSlitWidth = 2
+    jyutTime = 3
+    jyutTemperature = 4
+    jyutDataUnits = 5
+    jyutSpatial = 6
+    jyutTotalTypesPlusOne = 7
 
 class jyCCDDataType(Enum):
     JYMCD_ACQ_FORMAT_IMAGE = 0
