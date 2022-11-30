@@ -43,10 +43,14 @@ class ihr320SynapseEMMeasurementObject():
         self.synapseEM = synapseEM_barebones.synapseEM_barebones(**opt)
 
     def measure(self):
-        spec = []
-        for i in range(self.meta_data['numavgs']):
-            spec.append(self.synapseEM.acquire())
-        spec = np.mean(spec)
+        if self.meta_data['numavgs'] > 1:
+            print('averaging {} times'.format(self.meta_data['numavgs']))
+            spectra = []
+            for i in range(self.meta_data['numavgs']):
+                spectra.append(self.synapseEM.acquire())
+            spec = np.mean(spectra, axis=0)
+        else:
+            spec = self.synapseEM.acquire()
         data = {'wavelengths': self.wavelengths, 'spec': spec}
         return data
 
