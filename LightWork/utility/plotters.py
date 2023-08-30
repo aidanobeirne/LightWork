@@ -3,6 +3,7 @@ from __future__ import division, print_function, unicode_literals, absolute_impo
 import numpy as np
 import LightWork.utility.helper_functions as h
 import matplotlib as mpl
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import traceback
 
@@ -25,12 +26,13 @@ class ShallowPlotter():
         self.opt = {  # default options
             'spec_staggering':  0,  # amount to displace spectra by
             'legend_label':     'voltage',
-            'hovering_range':     None,
+            'hovering_range':    None,
             'title':            'title',  # plot title
             'xlabel':           'x',
             'ylabel':           'y',
             'ilabel':           'intensity [a.u.]',
             'cmap':             'inferno',
+            'cmap_series':      None,
             'shading':          'gouraud',
             'cr_m':             3,
             'cr_thresholds':    [],
@@ -121,6 +123,12 @@ class ShallowPlotter():
             self.x = 1240/self.x
         self.xx, self.yy = np.meshgrid(self.x, self.y)
 
+        if self.opt['cmap_series'] is not None:
+            colormap = getattr(cm, self.opt['cmap_series'])
+            self.colors = colormap(np.linspace(0, 1, len(self.y)))
+            if self.opt['camp_series_flip']:
+                self.colors = self.colors[::-1]
+
         # cosmic ray removal
         if self.opt['cr_thresholds']:
             self.data = np.array(h.RemoveCosmicRaysRecursive(
@@ -134,10 +142,14 @@ class ShallowPlotter():
         if self.shift_is_held:
             yidx = (abs(self.y - event.ydata)).argmin()
             yvalue = self.y[yidx]
+            if self.opt['cmap_series'] is not None:
+                color = self.colors[yidx]
+            else:
+                color = f'C{self.color_counter}'
             self.lines[yvalue] = self.axs[0].axhline(
-                yvalue, alpha=0.35, color='C{}'.format(self.color_counter))
+                yvalue, alpha=0.35, color=color)
             self.specs[yvalue] = self.axs[1].plot(
-                self.x, self.data[yidx, :] + self.color_counter * self.opt['spec_staggering'], label='{}={}'.format(self.opt['legend_label'], np.round(yvalue, 2)), color='C{}'.format(self.color_counter))
+                self.x, self.data[yidx, :] + self.color_counter * self.opt['spec_staggering'], label='{}={}'.format(self.opt['legend_label'], np.round(yvalue, 2)), color=color)
             self.axs[1].legend(prop={'size': 10})
             self.color_counter += 1
 
